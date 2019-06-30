@@ -1,0 +1,31 @@
+<html lang="en">
+<head>
+    <title>Tabs VS Spaces</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Hand Off</a>
+    </div>
+</nav>
+<div class="section">
+  <ul class="container collection center">
+        {% for o in orders %}
+            <li class="collection-item avatar">
+                <!--todo: go to bike page from here-->
+                <span class="title">
+                    Plate: <b>{{o.plate}}</b>
+                </span>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+<script>
+
+</script>
+</body>
+</html>

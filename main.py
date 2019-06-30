@@ -19,7 +19,6 @@ import os
 from flask import Flask, render_template, request, Response
 import sqlalchemy
 
-
 # Remember - storing secrets in plaintext is potentially unsafe. Consider using
 # something like https://cloud.google.com/kms/ to help keep secrets secret.
 db_user = os.environ.get("DB_USER")
@@ -34,7 +33,8 @@ logger = logging.getLogger()
 # [START cloud_sql_postgres_sqlalchemy_create]
 # The SQLAlchemy engine will help manage interactions, including automatically
 # managing a pool of connections to your database
-db = sqlalchemy.create_engine(cloud_sql_connection_name,
+db = sqlalchemy.create_engine(
+    cloud_sql_connection_name,
     # Equivalent URL:
     # postgres+pg8000://<db_user>:<db_pass>@/<db_name>?unix_socket=/cloudsql/<cloud_sql_instance_name>/.s.PGSQL.5432
     # sqlalchemy.engine.url.URL(
@@ -80,18 +80,29 @@ db = sqlalchemy.create_engine(cloud_sql_connection_name,
 
     # [END_EXCLUDE]
 )
+
+
 # [END cloud_sql_postgres_sqlalchemy_create]
 
-
-@app.before_first_request
-def create_tables():
-    # Create tables (if they don't already exist)
+@app.route('/hand_off', methods=['GET'])
+def hand_off():
+    # todo: where clouse
+    q = """
+        SELECT b.plates plate, b.name bike_name, l.name, l.address, c.l_name
+        FROM "order" o 
+            inner join bike b on o.bike = b.id
+            inner join customer c on o.cus_id = c.id
+            inner join "location" l on o.location_start = l.id
+    """
     with db.connect() as conn:
-        conn.execute(
-            "CREATE TABLE IF NOT EXISTS votes "
-            "( vote_id SERIAL NOT NULL, time_cast timestamp NOT NULL, "
-            "candidate VARCHAR(6) NOT NULL, PRIMARY KEY (vote_id) );"
-        )
+        orders = conn.execute(q).fetchall()
+        for r in orders:
+            print('r', r)
+
+    return render_template(
+        'hand-off.html',
+        orders=orders
+    )
 
 
 @app.route('/', methods=['GET'])
