@@ -30,62 +30,17 @@ app = Flask(__name__)
 
 logger = logging.getLogger()
 
-# [START cloud_sql_postgres_sqlalchemy_create]
-# The SQLAlchemy engine will help manage interactions, including automatically
-# managing a pool of connections to your database
 db = sqlalchemy.create_engine(
     cloud_sql_connection_name,
-    # Equivalent URL:
-    # postgres+pg8000://<db_user>:<db_pass>@/<db_name>?unix_socket=/cloudsql/<cloud_sql_instance_name>/.s.PGSQL.5432
-    # sqlalchemy.engine.url.URL(
-    #     drivername='postgres+pg8000',
-    #     username=db_user,
-    #     password=db_pass,
-    #     database=db_name,
-    #     query={
-    #         'unix_sock': '/cloudsql/{}/.s.PGSQL.5432'.format(
-    #             cloud_sql_connection_name)
-    #     }
-    # ),
-    # ... Specify additional properties here.
-    # [START_EXCLUDE]
-
-    # [START cloud_sql_postgres_sqlalchemy_limit]
-    # Pool size is the maximum number of permanent connections to keep.
     pool_size=5,
-    # Temporarily exceeds the set pool_size if no connections are available.
     max_overflow=2,
-    # The total number of concurrent connections for your application will be
-    # a total of pool_size and max_overflow.
-    # [END cloud_sql_postgres_sqlalchemy_limit]
-
-    # [START cloud_sql_postgres_sqlalchemy_backoff]
-    # SQLAlchemy automatically uses delays between failed connection attempts,
-    # but provides no arguments for configuration.
-    # [END cloud_sql_postgres_sqlalchemy_backoff]
-
-    # [START cloud_sql_postgres_sqlalchemy_timeout]
-    # 'pool_timeout' is the maximum number of seconds to wait when retrieving a
-    # new connection from the pool. After the specified amount of time, an
-    # exception will be thrown.
     pool_timeout=30,  # 30 seconds
-    # [END cloud_sql_postgres_sqlalchemy_timeout]
-
-    # [START cloud_sql_postgres_sqlalchemy_lifetime]
-    # 'pool_recycle' is the maximum number of seconds a connection can persist.
-    # Connections that live longer than the specified amount of time will be
-    # reestablished
     pool_recycle=1800,  # 30 minutes
-    # [END cloud_sql_postgres_sqlalchemy_lifetime]
-
-    # [END_EXCLUDE]
 )
 
 
-# [END cloud_sql_postgres_sqlalchemy_create]
-
-@app.route('/today_bikes', methods=['GET'])
-def today_bikes():
+@app.route('/drop_off_bikes_list', methods=['GET'])
+def drop_off_bikes_list():
     # todo: where clouse (date today and user email)
     q = """
         SELECT 
