@@ -41,7 +41,7 @@ db = sqlalchemy.create_engine(
 
 @app.route('/drop_off_bikes_list', methods=['GET'])
 def drop_off_bikes_list():
-    # todo: where clouse (date today and user email)
+    # todo: where clouse (start date == today and user email)
     q = """
         SELECT 
             b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
@@ -56,10 +56,31 @@ def drop_off_bikes_list():
         orders = conn.execute(q).fetchall()
 
     return render_template(
-        'today_bikes.html',
+        'drop_off_bikes.html',
         orders=orders
     )
 
+
+@app.route('/pickup_bikes_list', methods=['GET'])
+def pickup_bikes_list():
+    # todo: where clouse (end date == today and user email)
+    q = """
+           SELECT 
+               b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+               l.address loc_address, c.l_name cus_l_name, o.id order_id
+           FROM 
+               "order" o 
+               inner join bike b on o.bike = b.id
+               inner join customer c on o.cus_id = c.id
+               inner join "location" l on o.location_start = l.id
+       """
+    with db.connect() as conn:
+        orders = conn.execute(q).fetchall()
+
+    return render_template(
+        'pickup_bikes.html',
+        orders=orders
+    )
 
 @app.route('/hand_off_bike/<order_id>', methods=['GET'])
 def hand_off_bike(order_id):
