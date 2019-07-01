@@ -56,7 +56,7 @@ def drop_off_bikes_list():
         orders = conn.execute(q).fetchall()
 
     return render_template(
-        'drop_off_bikes.html',
+        'drop_off_bikes_list.html',
         orders=orders
     )
 
@@ -78,9 +78,10 @@ def pickup_bikes_list():
         orders = conn.execute(q).fetchall()
 
     return render_template(
-        'pickup_bikes.html',
+        'pickup_bikes_list.html',
         orders=orders
     )
+
 
 @app.route('/hand_off_bike/<order_id>', methods=['GET'])
 def hand_off_bike(order_id):
@@ -103,6 +104,31 @@ def hand_off_bike(order_id):
 
     return render_template(
         'hand_off_bike.html',
+        form_data=data
+    )
+
+
+@app.route('/pickup_bike/<order_id>', methods=['GET'])
+def pickup_bike(order_id):
+    q = """
+        SELECT 
+            b.plates plates, c.l_name l_name, c.f_name f_name, l.name loc_name, l.address loc_address,
+            b.mileage mileage, o.start "start", o."end" "end", b.name b_name, o.deposit deposit, 
+            o.d_currency d_curr, o.amount amount, o.a_currency a_currency
+        FROM 
+            "order" o 
+            inner join bike b on o.bike = b.id
+            inner join customer c on o.cus_id = c.id
+            inner join "location" l on o.location_start = l.id
+        WHERE 
+            o.id = %s
+    """
+
+    with db.connect() as conn:
+        data = conn.execute(q, order_id).fetchone()
+
+    return render_template(
+        'pickup_bike.html',
         form_data=data
     )
 
