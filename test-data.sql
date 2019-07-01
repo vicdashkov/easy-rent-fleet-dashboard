@@ -6,6 +6,10 @@ INSERT INTO public.bike(
 	name, mileage, location, plates)
 	VALUES ('test-bike', 1, 1, 'v771');
 
+INSERT INTO public.bike(
+	name, mileage, location, plates)
+	VALUES ('test-bike-2', 100, 1, 'b100');
+
 INSERT INTO public.customer(
 	l_name, f_name, location, phone, email, notes)
 	VALUES ('cus l name', 'cus f name', 1, '+1-878-2222-222', 'cus@email.com', '');

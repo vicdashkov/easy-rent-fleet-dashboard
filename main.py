@@ -83,6 +83,35 @@ def pickup_bikes_list():
     )
 
 
+@app.route('/available_bikes', methods=['GET'])
+def available_bikes():
+    # I want to see a bike that is not in orders
+    # and
+    # in orders but start date > today
+    # in orders but end date is not overlapping
+    # todo: where clouse
+    q = """
+        SELECT 
+           b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+           l.address loc_address, o.id order_id
+        FROM 
+           "bike" b
+           left join "order" o on o.bike = b.id
+           left join "location" l on o.location_start = l.id
+       """
+    with db.connect() as conn:
+        bikes = conn.execute(q).fetchall()
+
+    start_date = request.args.get('start_date')
+
+    print('s_d', start_date)
+
+    return render_template(
+        'available_bikes.html',
+        available_bikes=bikes
+    )
+
+
 @app.route('/hand_off_bike/<order_id>', methods=['GET'])
 def hand_off_bike(order_id):
     q = """
