@@ -3,7 +3,7 @@ INSERT INTO public.location(
 	VALUES ('test-hotel', '2-22 phuket st');
 
 INSERT INTO public.bike(
-	name, milage, location, plates)
+	name, mileage, location, plates)
 	VALUES ('test-bike', 1, 1, 'v771');
 
 INSERT INTO public.customer(
@@ -15,8 +15,8 @@ INSERT INTO public."user"(
 	VALUES (1, 'test-user l name', 'test user f name');
 
 INSERT INTO public."order"(
-	start, "end", cus_id, ammount, a_currency,
-	milage_start, milage_end, bike, notes,
+	start, "end", cus_id, amount, a_currency,
+	mileage_start, mileage_end, bike, notes,
 	location_start, location_end, deposit,
 	d_currency, assign_p_up, assign_d_off)
 	VALUES ('2016-06-22 19:10:25-07', '2016-06-23 19:10:25-07', 1, 100, 'RUB',

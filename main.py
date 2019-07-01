@@ -84,24 +84,73 @@ db = sqlalchemy.create_engine(
 
 # [END cloud_sql_postgres_sqlalchemy_create]
 
-@app.route('/hand_off', methods=['GET'])
-def hand_off():
-    # todo: where clouse
+@app.route('/today_bikes', methods=['GET'])
+def today_bikes():
+    # todo: where clouse (date today and user email)
     q = """
-        SELECT b.plates plate, b.name bike_name, l.name, l.address, c.l_name
-        FROM "order" o 
+        SELECT 
+            b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+            l.address loc_address, c.l_name cus_l_name, o.id order_id
+        FROM 
+            "order" o 
             inner join bike b on o.bike = b.id
             inner join customer c on o.cus_id = c.id
             inner join "location" l on o.location_start = l.id
     """
     with db.connect() as conn:
         orders = conn.execute(q).fetchall()
-        for r in orders:
-            print('r', r)
 
     return render_template(
-        'hand-off.html',
+        'today_bikes.html',
         orders=orders
+    )
+
+
+@app.route('/hand_off_bike/<order_id>', methods=['GET'])
+def hand_off_bike(order_id):
+    q = """
+        SELECT 
+            b.plates plates, c.l_name l_name, c.f_name f_name, l.name loc_name, l.address loc_address,
+            b.mileage mileage, o.start "start", o."end" "end", b.name b_name, o.deposit deposit, 
+            o.d_currency d_curr, o.amount amount, o.a_currency a_currency
+        FROM 
+            "order" o 
+            inner join bike b on o.bike = b.id
+            inner join customer c on o.cus_id = c.id
+            inner join "location" l on o.location_start = l.id
+        WHERE 
+            o.id = %s
+    """
+
+    with db.connect() as conn:
+        data = conn.execute(q, order_id).fetchone()
+
+    return render_template(
+        'hand_off_bike.html',
+        form_data=data
+    )
+
+
+@app.route('/hand_off_bike/<order_id>', methods=['POST'])
+def hand_off_bike_start(order_id):
+    stmt = sqlalchemy.text("""
+        UPDATE "order"
+        SET "status" = 'IN_PROGRESS'
+        WHERE "id" = :order_id
+        """)
+    try:
+        with db.connect() as conn:
+            conn.execute(stmt, order_id=order_id)
+    except Exception as e:
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to successfully update order"
+        )
+
+    return Response(
+        status=200,
+        response=f"updated order {order_id}. the order is not active"
     )
 
 

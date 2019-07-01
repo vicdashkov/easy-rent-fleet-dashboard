@@ -1,0 +1,64 @@
+<html lang="en">
+<head>
+    <title>Tabs VS Spaces</title>
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Hand off a bike</a>
+    </div>
+</nav>
+<div class="section">
+    <form action="{{form_data.order_id}}" method="post">
+
+        <table>
+            <tbody>
+            <tr>
+                <td>Bike Plate</td>
+                <td><strong>{{form_data.plates}}</strong></td>
+            </tr>
+             <tr>
+                <td>Bike Name</td>
+                <td><strong>{{form_data.b_name}}</strong></td>
+            </tr>
+            <tr>
+                <td>Customer Name</td>
+                <td><strong>{{form_data.l_name}} {{form_data.f_name}}</strong></td>
+            </tr>
+            <tr>
+                <td>Hotel</td>
+                <td><strong>{{form_data.loc_name}}</strong></td>
+            </tr>
+            <tr>
+                <td>Address</td>
+                <td><strong>{{form_data.loc_address}}</strong></td>
+            </tr>
+            <tr>
+                <td>Mileage at start</td>
+                <td><strong>{{form_data.mileage}}</strong></td>
+            </tr>
+            <tr>
+                <td>Rental Ends</td>
+                <td><strong>{{form_data.end}}</strong></td>
+            </tr>
+            <tr>
+                <td>Deposit</td>
+                <td><strong>{{form_data.deposit}} {{form_data.d_curr}}</strong></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <input type="submit" value="Start Rental">
+    </form>
+
+</div>
+</div>
+<script>
+
+</script>
+</body>
+</html>
