@@ -26,17 +26,23 @@
             </div>
             <input value="{{bike_data.l_id}}" name="bike-location-id" type="hidden">
             <input value="{{bike_data.id}}" name="bike-id" type="hidden">
+            <input value="{{bike_data.mileage}}" name="bike-mileage" type="hidden">
         </div>
 
+        <!--todo: notes-->
+        <!--todo: assign doff pp id-->
+        <!--todo: assign pup pp id-->
+
         <div class="row">
-            <div class="input-field col s6">
-                <input id="first_name" type="text" class="validate" required>
-                <label for="first_name">Customer First Name</label>
+            <div class="input-field col s12">
+                <select name="customer-id">
+                    <option value="" disabled selected>Customers</option>
+                    {% for c in customers %}
+                    <option value="{{c.id}}">{{c.f_name}} {{c.l_name}} | {{c.email}} | {{c.loc_name}}</option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="input-field col s6">
-                <input id="last_name" type="text" class="validate" required>
-                <label for="last_name">Customer Last Name</label>
-            </div>
+
         </div>
 
         <div class="row">
@@ -52,27 +58,25 @@
             <div class="col s6">
                 End:
                 <div class="input-field inline">
-                    <!--todo: requuired-->
-                    <input type="text" id="end-picker"
-                           placeholder="enter end date" class="datepicker validate">
+                    <input type="text" id="end-picker" name="end-date"
+                           placeholder="enter end date" class="datepicker validate" required>
                 </div>
             </div>
         </div>
 
         <div class="row">
             <div class="input-field col s6 center-align">
-                <select class="inline">
+                <select class="inline" name="start-location-id">
                     <option value="" disabled selected>Choose start location</option>
-                    {% for l in prefilled_data.locations %}
+                    {% for l in locations %}
                     <option value="{{l.loc_id}}">{{l.loc_name}}</option>
                     {% endfor %}
-
                 </select>
             </div>
             <div class="input-field col s6 center-align">
                 <select class="inline" name="end-location-id">
                     <option value="" disabled selected>Choose end location</option>
-                    {% for l in prefilled_data.locations %}
+                    {% for l in locations %}
                     <option value="{{l.loc_id}}">{{l.loc_name}}</option>
                     {% endfor %}
                 </select>
@@ -85,9 +89,9 @@
                 <label for="total-amount">Total Amount</label>
             </div>
             <div class="input-field col s2">
-                <select>
+                <select name="amount-cur-code">
                     <option value="" disabled selected>Amount Currency</option>
-                    {% for c in prefilled_data.currencies %}
+                    {% for c in currencies %}
                     <option value="{{c.cur_code}}">{{c.cur_code}}</option>
                     {% endfor %}
                 </select>
@@ -98,9 +102,9 @@
                 <label for="deposit-amount">Deposit Amount</label>
             </div>
             <div class="input-field col s2">
-                <select>
+                <select name="deposit-cur-code">
                     <option value="" disabled selected>Deposit Currency</option>
-                    {% for c in prefilled_data.currencies %}
+                    {% for c in currencies %}
                     <option value="{{c.cur_code}}">{{c.cur_code}}</option>
                     {% endfor %}
                 </select>

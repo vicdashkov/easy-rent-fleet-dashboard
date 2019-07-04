@@ -1,12 +1,11 @@
 import datetime
 import logging
 import os
+from dateutil import parser
 
 from flask import Flask, render_template, request, Response
 import sqlalchemy
 
-# Remember - storing secrets in plaintext is potentially unsafe. Consider using
-# something like https://cloud.google.com/kms/ to help keep secrets secret.
 db_user = os.environ.get("DB_USER")
 db_pass = os.environ.get("DB_PASS")
 db_name = os.environ.get("DB_NAME")
@@ -53,20 +52,25 @@ def fill_order_page(bike_id):
         WHERE b.id=%s;
     """
 
+    customers_q = """
+        SELECT c.id "id", c.l_name l_name, c.f_name f_name, 
+            c.email email, c.phone phone, l.name loc_name
+        FROM public.customer c
+        JOIN public.location l on c.location = l.id;
+    """
+
     with db.connect() as conn:
         locations = conn.execute(locations_q).fetchall()
         currencies = conn.execute(currencies_q).fetchall()
         bike_data = conn.execute(bike_q, bike_id).fetchone()
+        customers = conn.execute(customers_q).fetchall()
 
-    print("bike_daat", bike_data)
-    prefilled_data = {
-        "locations": locations,
-        "currencies": currencies
-    }
     return render_template(
         'fill_order.html',
-        prefilled_data=prefilled_data,
-        bike_data=bike_data
+        locations=locations,
+        currencies=currencies,
+        bike_data=bike_data,
+        customers=customers
     )
 
 
@@ -74,12 +78,48 @@ def fill_order_page(bike_id):
 def fill_order_submit():
     print("form", request.form)
 
-    data = request.form.get('input_name', 0)
+    f = request.form
 
-    order_id = 99
+    stmt = sqlalchemy.text("""
+        INSERT INTO public."order"(
+            start, "end", cus_id, amount, milage_start, 
+            milage_end, bike, notes, location_start, location_end, 
+            deposit, d_currency, assign_p_up, assign_d_off, a_currency,
+            status)
+        VALUES (:start, :end, :cus_id, :amount, :m_start, 
+                :m_end, :bike, :notes, :l_start, :l_end, 
+                :deposit, :dep_curr, :assign_p_up, :assign_d_off, :a_currency, 
+                'IN_PROGRESS')
+        RETURNING id;
+    """)
+    start_date = parser.parse(f.get('start-date'))
+    end_date = parser.parse(f.get('end-date'))
+
+    # todo: assing d off pp
+    # todo: assing p up pp
+    # todo: notes
+
+    try:
+        with db.connect() as conn:
+            r = conn.execute(
+                stmt, start=start_date, end=end_date,
+                cus_id=f.get('customer-id'), amount=f.get('t-amount'), m_start=f.get('bike-mileage'),
+                m_end=f.get('bike-mileage'), bike=f.get('bike-id'), notes='', l_start=f.get('start-location-id'),
+                l_end=f.get('end-location-id'), deposit=f.get('d-amount'), dep_curr=f.get('deposit-cur-code'),
+                assign_p_up=1, assign_d_off=1, a_currency=f.get('amount-cur-code')
+            ).fetchone()
+            print('result returning', r)
+    except Exception as e:
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to submit the order"
+        )
+
     return Response(
         status=200,
-        response=f"submitted order {order_id}"
+        response=f"submitted order {r.id}"
+
     )
 
 
