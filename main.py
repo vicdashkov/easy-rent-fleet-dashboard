@@ -28,24 +28,51 @@ db = sqlalchemy.create_engine(
 @app.route('/fill_order/<bike_id>', methods=['GET'])
 def fill_order_page(bike_id):
     print('bike id', bike_id)
+
+    locations_q = """
+        SELECT id loc_id, name loc_name, address loc_address
+        FROM public.location;
+    """
+
+    currencies_q = """
+        SELECT
+            pg_type.typname, 
+            pg_enum.enumlabel cur_code
+        FROM
+            pg_type 
+        JOIN
+            pg_enum ON pg_enum.enumtypid = pg_type.oid
+        WHERE pg_type.typname = 'currency';
+    """
+
+    bike_q = """
+        SELECT b.id id, b.name "name", b.mileage mileage, 
+            b.plates plates, l.name l_name, l.address l_address, l.id l_id
+        FROM public.bike b
+        JOIN public.location l on b.location = l.id
+        WHERE b.id=%s;
+    """
+
+    with db.connect() as conn:
+        locations = conn.execute(locations_q).fetchall()
+        currencies = conn.execute(currencies_q).fetchall()
+        bike_data = conn.execute(bike_q, bike_id).fetchone()
+
+    print("bike_daat", bike_data)
     prefilled_data = {
-        "bike_id": bike_id,
-        "bike_plates": "dummy plates",
-        "bike_name": "dummy name",
-        "location_name": "dummy location name",
-        "locations": [{"loc_id": 1, "loc_name": "some hotel"}],
-        "currencies": [{"cur_code": "RUB"}, {"cur_code": "EUR"}]
+        "locations": locations,
+        "currencies": currencies
     }
     return render_template(
         'fill_order.html',
-        prefilled_data=prefilled_data
+        prefilled_data=prefilled_data,
+        bike_data=bike_data
     )
 
 
 @app.route('/fill_order/', methods=['post'])
 def fill_order_submit():
     print("form", request.form)
-    print("data", request.data)
 
     data = request.form.get('input_name', 0)
 

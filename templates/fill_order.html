@@ -8,24 +8,24 @@
 </nav>
 <div class="section">
     <form class="col s12" action="." method="post">
-
+        <!--todo: form dowsn't send all info. need more names-->
         <div class="row">
             <div class="input-field col s4">
-                <input readonly value="{{prefilled_data.bike_name}}" id="bike-name" type="text"
+                <input readonly value="{{bike_data.name}}" id="bike-name" type="text"
                        name="bike-name" required>
                 <label for="bike-name">Bike</label>
             </div>
             <div class="input-field col s4">
-                <input readonly value="{{prefilled_data.bike_plates}}" id="bike-plates" type="text"
+                <input readonly value="{{bike_data.plates}}" id="bike-plates" type="text"
                        name="bike-plates" required>
                 <label for="bike-plates">Plates</label>
             </div>
-            <!--todo invisible filed for loc id-->
             <div class="input-field col s4">
-                <input readonly value="{{prefilled_data.location_name}}" id="bike-location" type="text"
-                       name="bike-location-id" required>
+                <input readonly value="{{bike_data.l_name}}" id="bike-location" type="text" required>
                 <label for="bike-location">located at hotel</label>
             </div>
+            <input value="{{bike_data.l_id}}" name="bike-location-id" type="hidden">
+            <input value="{{bike_data.id}}" name="bike-id" type="hidden">
         </div>
 
         <div class="row">
@@ -73,7 +73,7 @@
                 <select class="inline" name="end-location-id">
                     <option value="" disabled selected>Choose end location</option>
                     {% for l in prefilled_data.locations %}
-                    <option  value="{{l.loc_id}}">{{l.loc_name}}</option>
+                    <option value="{{l.loc_id}}">{{l.loc_name}}</option>
                     {% endfor %}
                 </select>
             </div>
@@ -109,24 +109,6 @@
 
         <button type="submit">Send your message</button>
     </form>
-
-
-    <form action="." method="post">
-        <div>
-            <label for="name">Name:</label>
-            <input type="text" id="name" name="user_name">
-        </div>
-        <div>
-            <label for="mail">E-mail:</label>
-            <input type="email" id="mail" name="user_mail">
-        </div>
-        <div>
-            <label for="msg">Message:</label>
-            <textarea id="msg" name="user_message"></textarea>
-        </div>
-        <button type="submit">Send your message</button>
-    </form>
-
 </div>
 <script>
 
@@ -139,6 +121,7 @@ document.addEventListener('DOMContentLoaded', function() {
     var selectsInstances = M.FormSelect.init(selects, {});
 
 });
+
 
 </script>
 </body>
