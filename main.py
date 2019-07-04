@@ -1,17 +1,3 @@
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import datetime
 import logging
 import os
@@ -37,6 +23,37 @@ db = sqlalchemy.create_engine(
     pool_timeout=30,  # 30 seconds
     pool_recycle=1800,  # 30 minutes
 )
+
+
+@app.route('/fill_order/<bike_id>', methods=['GET'])
+def fill_order_page(bike_id):
+    print('bike id', bike_id)
+    prefilled_data = {
+        "bike_id": bike_id,
+        "bike_plates": "dummy plates",
+        "bike_name": "dummy name",
+        "location_name": "dummy location name",
+        "locations": [{"loc_id": 1, "loc_name": "some hotel"}],
+        "currencies": [{"cur_code": "RUB"}, {"cur_code": "EUR"}]
+    }
+    return render_template(
+        'fill_order.html',
+        prefilled_data=prefilled_data
+    )
+
+
+@app.route('/fill_order/', methods=['post'])
+def fill_order_submit():
+    print("form", request.form)
+    print("data", request.data)
+
+    data = request.form.get('input_name', 0)
+
+    order_id = 99
+    return Response(
+        status=200,
+        response=f"submitted order {order_id}"
+    )
 
 
 @app.route('/drop_off_bikes_list', methods=['GET'])
@@ -181,7 +198,7 @@ def hand_off_bike_start(order_id):
 
     return Response(
         status=200,
-        response=f"updated order {order_id}. the order is not active"
+        response=f"updated order {order_id}. the order is now active"
     )
 
 

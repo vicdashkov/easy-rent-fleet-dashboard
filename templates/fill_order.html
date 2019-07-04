@@ -1,0 +1,145 @@
+<html lang="en">
+{% include "head_include.html" %}
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Hand off a bike</a>
+    </div>
+</nav>
+<div class="section">
+    <form class="col s12" action="." method="post">
+
+        <div class="row">
+            <div class="input-field col s4">
+                <input readonly value="{{prefilled_data.bike_name}}" id="bike-name" type="text"
+                       name="bike-name" required>
+                <label for="bike-name">Bike</label>
+            </div>
+            <div class="input-field col s4">
+                <input readonly value="{{prefilled_data.bike_plates}}" id="bike-plates" type="text"
+                       name="bike-plates" required>
+                <label for="bike-plates">Plates</label>
+            </div>
+            <!--todo invisible filed for loc id-->
+            <div class="input-field col s4">
+                <input readonly value="{{prefilled_data.location_name}}" id="bike-location" type="text"
+                       name="bike-location-id" required>
+                <label for="bike-location">located at hotel</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s6">
+                <input id="first_name" type="text" class="validate" required>
+                <label for="first_name">Customer First Name</label>
+            </div>
+            <div class="input-field col s6">
+                <input id="last_name" type="text" class="validate" required>
+                <label for="last_name">Customer Last Name</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col s6">
+                Start:
+                <div class="input-field inline">
+                    <!--todo: requuired-->
+                    <input type="text" id="start-picker" name="start-date"
+                           placeholder="enter start date" class="datepicker validate">
+                </div>
+            </div>
+
+            <div class="col s6">
+                End:
+                <div class="input-field inline">
+                    <!--todo: requuired-->
+                    <input type="text" id="end-picker"
+                           placeholder="enter end date" class="datepicker validate">
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s6 center-align">
+                <select class="inline">
+                    <option value="" disabled selected>Choose start location</option>
+                    {% for l in prefilled_data.locations %}
+                    <option value="{{l.loc_id}}">{{l.loc_name}}</option>
+                    {% endfor %}
+
+                </select>
+            </div>
+            <div class="input-field col s6 center-align">
+                <select class="inline" name="end-location-id">
+                    <option value="" disabled selected>Choose end location</option>
+                    {% for l in prefilled_data.locations %}
+                    <option  value="{{l.loc_id}}">{{l.loc_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s4">
+                <input id="total-amount" type="number" class="validate" name="t-amount" required>
+                <label for="total-amount">Total Amount</label>
+            </div>
+            <div class="input-field col s2">
+                <select>
+                    <option value="" disabled selected>Amount Currency</option>
+                    {% for c in prefilled_data.currencies %}
+                    <option value="{{c.cur_code}}">{{c.cur_code}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-field col s4">
+                <input id="deposit-amount" type="number" class="validate" name="d-amount" required>
+                <label for="deposit-amount">Deposit Amount</label>
+            </div>
+            <div class="input-field col s2">
+                <select>
+                    <option value="" disabled selected>Deposit Currency</option>
+                    {% for c in prefilled_data.currencies %}
+                    <option value="{{c.cur_code}}">{{c.cur_code}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <button type="submit">Send your message</button>
+    </form>
+
+
+    <form action="." method="post">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="user_name">
+        </div>
+        <div>
+            <label for="mail">E-mail:</label>
+            <input type="email" id="mail" name="user_mail">
+        </div>
+        <div>
+            <label for="msg">Message:</label>
+            <textarea id="msg" name="user_message"></textarea>
+        </div>
+        <button type="submit">Send your message</button>
+    </form>
+
+</div>
+<script>
+
+// todo: put to script.js
+document.addEventListener('DOMContentLoaded', function() {
+    var elems = document.querySelectorAll('.datepicker');
+    var instances = M.Datepicker.init(elems, {format: "d-m-yyyy"});
+
+    var selects = document.querySelectorAll('select');
+    var selectsInstances = M.FormSelect.init(selects, {});
+
+});
+
+</script>
+</body>
+</html>
