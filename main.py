@@ -181,7 +181,13 @@ def available_bikes():
     # and
     # in orders but start date > today
     # in orders but end date is not overlapping
-    # todo: where clouse
+    # todo: where clouse complete
+
+    # todo: make sure returns only one bike
+
+    # todo: don't forget: SELECT ('2001-02-16'::date, '2001-12-21'::date) OVERLAPS ('2001-12-21'::date, '2002-10-30'::date); --> false
+    # start <= time < end.
+
     q = """
         SELECT 
            b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
@@ -190,14 +196,17 @@ def available_bikes():
            "bike" b
            left join "order" o on o.bike = b.id
            left join "location" l on o.location_start = l.id
+        WHERE 
+            (not (o.start::date, o.end::date) overlaps (%s::date, %s::date))
+            or (o.start is null and o.end is null)
        """
+
+    start_date = parser.parse(request.args.get('s_date', str(datetime.date.today())))
+    end_date = parser.parse(request.args.get('e_date', str(datetime.date.today() + datetime.timedelta(days=1))))
+    print('s_d / e_d', start_date, end_date)
+
     with db.connect() as conn:
-        bikes = conn.execute(q).fetchall()
-
-    start_date = request.args.get('start_date')
-    end_date = request.args.get('end_date')
-
-    print('s_d', start_date, end_date)
+        bikes = conn.execute(q, str(start_date), str(end_date)).fetchall()
 
     return render_template(
         'available_bikes.html',
