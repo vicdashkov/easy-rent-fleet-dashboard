@@ -78,6 +78,8 @@ def fill_order_page(bike_id):
 def fill_order_submit():
     print("form", request.form)
 
+    # todo: need to check if the bike can be inserted
+
     f = request.form
 
     stmt = sqlalchemy.text("""
@@ -173,6 +175,8 @@ def pickup_bikes_list():
 
 @app.route('/available_bikes', methods=['GET'])
 def available_bikes():
+    # todo: need to test it thoroughly
+
     # I want to see a bike that is not in orders
     # and
     # in orders but start date > today
@@ -191,8 +195,9 @@ def available_bikes():
         bikes = conn.execute(q).fetchall()
 
     start_date = request.args.get('start_date')
+    end_date = request.args.get('end_date')
 
-    print('s_d', start_date)
+    print('s_d', start_date, end_date)
 
     return render_template(
         'available_bikes.html',
