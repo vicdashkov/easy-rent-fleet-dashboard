@@ -69,11 +69,9 @@ def create_customer():
         response=f"created customer {r.id}"
     )
 
-# todo: gitted from now on; not tested
+
 @app.route('/create_vehicle', methods=['GET'])
 def create_vehicle_page():
-    # todo: <critical> need notes for bike as well
-
     locations_q = """
         SELECT id loc_id, name loc_name, address loc_address
         FROM public.location;
@@ -90,8 +88,6 @@ def create_vehicle_page():
 
 @app.route('/create_vehicle', methods=['post'])
 def create_vehicle():
-    print("form", request.form)
-
     f = request.form
 
     stmt = sqlalchemy.text("""
@@ -111,18 +107,17 @@ def create_vehicle():
         logger.exception(e)
         return Response(
             status=500,
-            response="Unable to create a bike"
+            response="Unable to create a vehicle"
         )
 
     return Response(
         status=200,
-        response=f"created bike {r.id}"
+        response=f"created vehicle {r.id}"
     )
 
 
 @app.route('/create_location', methods=['GET'])
 def create_location_page():
-    # todo: <critical> need notes for hotels as well
     return render_template(
         'create_location.html'
     )
@@ -158,7 +153,6 @@ def create_location():
         response=f"created location {r.id}"
     )
 
-# todo: gitted not testes ends
 
 @app.route('/fill_order/<bike_id>', methods=['GET'])
 def fill_order_page(bike_id):

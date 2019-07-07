@@ -1,0 +1,37 @@
+<html lang="en">
+{% include "head_include.html" %}
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Create Location</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="admin_main">Admin Main</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="section">
+    <form class="col s12" action="create_location" method="post">
+
+        <div class="row">
+            <div class="input-field col s6">
+                <input value="" id="name" type="text" name="name" required>
+                <label for="name">Location Name</label>
+            </div>
+            <div class="input-field col s6">
+                <input value="" id="address" type="text" name="address" required>
+                <label for="address">Location Address</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s12">
+                <input value="" id="notes" type="text" name="notes">
+                <label for="notes">Notes</label>
+            </div>
+        </div>
+
+        <button type="submit">Create Location</button>
+    </form>
+</div>
+</body>
+</html>

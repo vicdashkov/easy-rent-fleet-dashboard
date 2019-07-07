@@ -1,0 +1,53 @@
+<html lang="en">
+{% include "head_include.html" %}
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Create Vehicle</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="admin_main">Admin Main</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="section">
+    <form class="col s12" action="create_vehicle" method="post">
+
+        <div class="row">
+            <div class="input-field col s4">
+                <input value="" id="name" type="text" name="name" required>
+                <label for="name">Vehicle Name</label>
+            </div>
+            <div class="input-field col s4">
+                <input value="" id="plates" type="text" name="plates" required>
+                <label for="plates">Vehicle Plates</label>
+            </div>
+              <div class="input-field col s4">
+                <input value="" id="mileage" type="text" name="mileage" required>
+                <label for="mileage">Vehicle Mileage</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s12">
+                <select name="location-id">
+                    <option value="" disabled selected>Select Vehicle Location</option>
+                    {% for l in locations %}
+                    <option value="{{l.loc_id}}">{{l.loc_name}} | {{l.loc_address}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="input-field col s12">
+                <input value="" id="notes" type="text" name="notes">
+                <label for="notes">Notes</label>
+            </div>
+        </div>
+
+        <button type="submit">Create Vehicle</button>
+    </form>
+</div>
+</body>
+</html>
