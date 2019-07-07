@@ -12,10 +12,9 @@
 <div class="section">
     <form action="" method="get">
 
-        <!--<label for="start-datepicker" class="">Start Date</label>-->
-        <input id="start-datepicker" name="s_date"
+        <input id="start-datepicker" name="s_date" value="{{start_date}}"
                type="text" class="datepicker datepicker-custom" placeholder="Start Date" required>
-        <input id="end-datepicker" name="e_date"
+        <input id="end-datepicker" name="e_date" value="{{end_date}}"
                type="text" class="datepicker datepicker-custom" placeholder="End Date" required>
         <input type="submit" value="Search Date">
 
@@ -31,7 +30,7 @@
             </thead>
 
             <tbody>
-            {% for b in available_bikes %}
+            {% for b in available_vehicles %}
 
             <tr>
                 <td><strong>
@@ -47,16 +46,6 @@
         </table>
 
     </form>
-
 </div>
-</div>
-<script>
-
-document.addEventListener('DOMContentLoaded', function() {
-    var elems = document.querySelectorAll('.datepicker');
-    var instances = M.Datepicker.init(elems, {format: "d-m-yyyy"});
-});
-
-</script>
 </body>
 </html>

@@ -3,7 +3,7 @@
 <body>
 <nav class="red lighten-1">
     <div class="nav-wrapper">
-        <a href="#" class="brand-logo center">Hand off a bike</a>
+        <a href="#" class="brand-logo center">Drop off a vehicle</a>
     </div>
 </nav>
 <div class="section">
@@ -32,9 +32,12 @@
                 <td><strong>{{form_data.loc_address}}</strong></td>
             </tr>
             <tr>
-                <!--todo: type in value-->
-                <td>Mileage at start</td>
+                <td>Mileage at the start of the day</td>
                 <td><strong>{{form_data.mileage}}</strong></td>
+            </tr>
+            <tr>
+                <td>Current Mileage</td>
+                <td><input value="" type="number" name="current-mileage" required></td>
             </tr>
             <tr>
                 <td>Rental Ends</td>
@@ -50,13 +53,10 @@
             </tr>
             </tbody>
         </table>
-
+        <input value="{{form_data.bike_id}}" name="bike-id" type="hidden">
         <input type="submit" value="Start Rental">
     </form>
 
 </div>
-<script>
-
-</script>
 </body>
 </html>
