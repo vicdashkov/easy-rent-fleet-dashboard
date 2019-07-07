@@ -1,8 +1,7 @@
--- Table: public.bike
--- DROP TABLE public.bike;
+-- todo: delete this file
 CREATE TABLE public.bike
 (
-    id integer NOT NULL DEFAULT nextval('bike_id_seq'::regclass),
+    id serial NOT NULL,
     name character varying COLLATE pg_catalog."default" NOT NULL,
     mileage integer NOT NULL,
     location integer NOT NULL,
@@ -13,19 +12,10 @@ CREATE TABLE public.bike
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
 
-ALTER TABLE public.bike
-    OWNER to postgres;
-
--- Table: public.customer
--- DROP TABLE public.customer;
 CREATE TABLE public.customer
 (
-    id integer NOT NULL DEFAULT nextval('customer_id_seq'::regclass),
+    id serial,
     l_name character varying COLLATE pg_catalog."default" NOT NULL,
     f_name character varying COLLATE pg_catalog."default" NOT NULL,
     location integer NOT NULL,
@@ -38,19 +28,10 @@ CREATE TABLE public.customer
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
 
-ALTER TABLE public.customer
-    OWNER to postgres;
-
--- Table: public."order"
--- DROP TABLE public."order";
 CREATE TABLE public."order"
 (
-    id integer NOT NULL DEFAULT nextval('order_id_seq'::regclass),
+    id serial,
     start timestamp with time zone NOT NULL,
     "end" timestamp with time zone NOT NULL,
     cus_id integer NOT NULL,
@@ -91,45 +72,41 @@ CREATE TABLE public."order"
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
 
-ALTER TABLE public."order"
-    OWNER to postgres;
-
--- Table: public.location
--- DROP TABLE public.location;
 CREATE TABLE public.location
 (
-    id integer NOT NULL DEFAULT nextval('location_id_seq'::regclass),
+    id serial,
     name character varying COLLATE pg_catalog."default" NOT NULL,
     address character varying COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT location_pkey PRIMARY KEY (id)
 )
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
 
-ALTER TABLE public.location
-    OWNER to postgres;
-
--- Table: public."user"
--- DROP TABLE public."user";
 CREATE TABLE public."user"
 (
-    id integer NOT NULL DEFAULT nextval('user_id_seq'::regclass),
+    id serial,
     type smallint NOT NULL,
     l_name character varying COLLATE pg_catalog."default" NOT NULL,
     f_name character varying COLLATE pg_catalog."default" NOT NULL,
     CONSTRAINT user_pkey PRIMARY KEY (id)
 )
-WITH (
-    OIDS = FALSE
-)
-TABLESPACE pg_default;
 
-ALTER TABLE public."user"
-    OWNER to postgres;
+CREATE TYPE public.currency AS ENUM
+    ('USD', 'THB', 'RUB');
+
+CREATE TYPE public.status AS ENUM
+    ('IN_PROGRESS', 'PENDING', 'DELETED');
+
+ALTER TABLE public."order"
+    RENAME currency TO d_currency;
+
+ALTER TABLE public."order"
+    ADD COLUMN a_currency currency NOT NULL;
+
+ALTER TABLE public."order"
+    ADD COLUMN status status NOT NULL;
+
+ALTER TABLE public.bike
+    ADD COLUMN notes text;
+
+ALTER TABLE public.location
+    ADD COLUMN notes text;

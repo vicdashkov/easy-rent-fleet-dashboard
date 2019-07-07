@@ -22,8 +22,8 @@ INSERT INTO public."order"(
 	start, "end", cus_id, amount, a_currency,
 	mileage_start, mileage_end, bike, notes,
 	location_start, location_end, deposit,
-	d_currency, assign_p_up, assign_d_off)
+	d_currency, assign_p_up, assign_d_off, status)
 	VALUES ('2016-06-22 19:10:25-07', '2016-06-23 19:10:25-07', 1, 100, 'RUB',
 			1, 1, 1, '',
 			1, 1, 50,
-			'RUB', 1, 1);
+			'RUB', 1, 1, 'PENDING');
