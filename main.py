@@ -182,6 +182,13 @@ def fill_order_page(bike_id):
         WHERE b.id=%s;
     """
 
+    bikes_q = """
+        SELECT b.id id, b.name "name", b.mileage mileage, 
+            b.plates plates, l.name l_name, l.address l_address, l.id l_id
+        FROM public.bike b
+        JOIN public.location l on b.location = l.id
+    """
+
     customers_q = """
         SELECT c.id "id", c.l_name l_name, c.f_name f_name, 
             c.email email, c.phone phone, l.name loc_name
@@ -193,14 +200,16 @@ def fill_order_page(bike_id):
         locations = conn.execute(locations_q).fetchall()
         currencies = conn.execute(currencies_q).fetchall()
         bike_data = conn.execute(bike_q, bike_id).fetchone()
+        bikes = conn.execute(bikes_q).fetchall()
         customers = conn.execute(customers_q).fetchall()
 
     return render_template(
-        'fill_order.html',
+        'order.html',
         locations=locations,
         currencies=currencies,
         bike_data=bike_data,
-        customers=customers
+        customers=customers,
+        bikes=bikes
     )
 
 
@@ -208,14 +217,14 @@ def fill_order_page(bike_id):
 def fill_order_submit():
     print("form", request.form)
 
-    # todo: need to check if the bike can be inserted
+    # todo: <feature> need to check if the bike can be inserted
 
     f = request.form
 
     stmt = sqlalchemy.text("""
         INSERT INTO public."order"(
-            start, "end", cus_id, amount, milage_start, 
-            milage_end, bike, notes, location_start, location_end, 
+            start, "end", cus_id, amount, mileage_start, 
+            mileage_end, bike, notes, location_start, location_end, 
             deposit, d_currency, assign_p_up, assign_d_off, a_currency,
             status)
         VALUES (:start, :end, :cus_id, :amount, :m_start, 
@@ -227,18 +236,28 @@ def fill_order_submit():
     start_date = parser.parse(f.get('start-date'))
     end_date = parser.parse(f.get('end-date'))
 
-    # todo: assing d off pp
-    # todo: assing p up pp
-    # todo: notes
+    # todo: <feature> assing d off pp
+    # todo: <feature> assing p up pp
 
     try:
         with db.connect() as conn:
             r = conn.execute(
-                stmt, start=start_date, end=end_date,
-                cus_id=f.get('customer-id'), amount=f.get('t-amount'), m_start=f.get('bike-mileage'),
-                m_end=f.get('bike-mileage'), bike=f.get('bike-id'), notes='', l_start=f.get('start-location-id'),
-                l_end=f.get('end-location-id'), deposit=f.get('d-amount'), dep_curr=f.get('deposit-cur-code'),
-                assign_p_up=1, assign_d_off=1, a_currency=f.get('amount-cur-code')
+                stmt,
+                start=start_date,
+                end=end_date,
+                cus_id=f.get('customer-id'),
+                amount=f.get('t-amount'),
+                m_start=f.get('bike-mileage'),
+                m_end=f.get('bike-mileage'),
+                bike=f.get('bike-id'),
+                notes=f.get('notes'),
+                l_start=f.get('start-location-id'),
+                l_end=f.get('end-location-id'),
+                deposit=f.get('d-amount'),
+                dep_curr=f.get('deposit-cur-code'),
+                assign_p_up=2,
+                assign_d_off=2,
+                a_currency=f.get('amount-cur-code')
             ).fetchone()
             print('result returning', r)
     except Exception as e:

@@ -1,0 +1,122 @@
+<html lang="en">
+{% include "head_include.html" %}
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <!--TODO: ???-->
+        <a href="#" class="brand-logo center">Hand off a bike</a>
+    </div>
+</nav>
+<div class="section">
+    <form class="col s12" action="." method="post">
+        <div class="row">
+            <div class="input-field col s12">
+                <select name="bike-id">
+                    <option value="{{bike_data.id}}">
+                        {{bike_data.name}} || {{bike_data.plates}} || {{bike_data.l_name}}
+                    </option>
+
+                    {% for b in bikes %}
+                    <option value="{{b.id}}">
+                        {{b.name}} || {{b.plates}} || {{b.l_name}}
+                    </option>
+                    {% endfor %}
+
+                </select>
+            </div>
+            <input value="{{bike_data.l_id}}" name="bike-location-id" type="hidden">
+            <input value="{{bike_data.mileage}}" name="bike-mileage" type="hidden">
+        </div>
+
+        <!--todo: <feature> assign doff pp id-->
+        <!--todo: <feature> assign pup pp id-->
+
+        <div class="row">
+            <div class="input-field col s12">
+                <select name="customer-id">
+                    <option value="" disabled selected>Customers</option>
+                    {% for c in customers %}
+                    <option value="{{c.id}}">{{c.f_name}} {{c.l_name}} || {{c.email}} || {{c.loc_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="col s6">
+                Start:
+                <div class="input-field inline">
+                    <input type="text" id="start-picker" name="start-date"
+                           placeholder="enter start date" class="datepicker validate" required>
+                </div>
+            </div>
+
+            <div class="col s6">
+                End:
+                <div class="input-field inline">
+                    <input type="text" id="end-picker" name="end-date"
+                           placeholder="enter end date" class="datepicker validate" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s6 center-align">
+                <select class="inline" name="start-location-id">
+                    <option value="" disabled selected>Choose start location</option>
+                    {% for l in locations %}
+                    <option value="{{l.loc_id}}">{{l.loc_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="input-field col s6 center-align">
+                <select class="inline" name="end-location-id">
+                    <option value="" disabled selected>Choose end location</option>
+                    {% for l in locations %}
+                    <option value="{{l.loc_id}}">{{l.loc_name}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s4">
+                <input id="total-amount" type="number" class="validate" name="t-amount" required>
+                <label for="total-amount">Total Amount</label>
+            </div>
+            <div class="input-field col s2">
+                <select name="amount-cur-code">
+                    <option value="" disabled selected>Amount Currency</option>
+                    {% for c in currencies %}
+                    <option value="{{c.cur_code}}">{{c.cur_code}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="input-field col s4">
+                <input id="deposit-amount" type="number" class="validate" name="d-amount" required>
+                <label for="deposit-amount">Deposit Amount</label>
+            </div>
+            <div class="input-field col s2">
+                <select name="deposit-cur-code">
+                    <option value="" disabled selected>Deposit Currency</option>
+                    {% for c in currencies %}
+                    <option value="{{c.cur_code}}">{{c.cur_code}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s12">
+                <input value="" id="notes" type="text" name="notes">
+                <label for="notes">Notes</label>
+            </div>
+        </div>
+
+        <button type="submit">Submit Order</button>
+    </form>
+</div>
+</body>
+</html>
