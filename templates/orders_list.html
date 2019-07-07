@@ -1,0 +1,43 @@
+<html lang="en">
+{% include "head_include.html" %}
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Orders</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="admin_main">Admin Main</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="section">
+    <table>
+
+        <thead>
+        <tr>
+            <th>Order Id</th>
+            <th>Plate</th>
+            <th>Hotel</th>
+            <th>Address</th>
+            <th>Status</th>
+            <th>Start</th>
+            <th>End</th>
+        </tr>
+        </thead>
+
+        <tbody>
+        {% for o in orders %}
+        <tr>
+            <td><strong><a href="/view_order/{{o.order_id}}"> {{o.order_id}}</a></strong></td>
+            <td>{{o.plate}}</td>
+            <td>{{o.loc_name}}</td>
+            <td>{{o.loc_address}}</td>
+            <td>{{o.order_status}}</td>
+            <td>{{o.start_date}}</td>
+            <td>{{o.end_date}}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+</body>
+</html>
