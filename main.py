@@ -24,6 +24,142 @@ db = sqlalchemy.create_engine(
 )
 
 
+@app.route('/create_customer', methods=['GET'])
+def create_customer_page():
+    locations_q = """
+        SELECT id loc_id, name loc_name, address loc_address
+        FROM public.location;
+    """
+
+    with db.connect() as conn:
+        locations = conn.execute(locations_q).fetchall()
+
+    return render_template(
+        'create_customer.html',
+        locations=locations
+    )
+
+
+@app.route('/create_customer', methods=['post'])
+def create_customer():
+    f = request.form
+
+    stmt = sqlalchemy.text("""
+        INSERT INTO public."customer"(
+            l_name, f_name, location, phone, email, notes)
+        VALUES (:l_name, :f_name, :l_id, :phone, :email, :notes)
+        RETURNING id;
+    """)
+
+    try:
+        with db.connect() as conn:
+            r = conn.execute(
+                stmt, l_name=f.get('last-name'), f_name=f.get('first-name'), l_id=f.get('location-id'),
+                email=f.get('email'), phone=f.get('phone'), notes=f.get('notes')
+            ).fetchone()
+    except Exception as e:
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to create a customer"
+        )
+
+    return Response(
+        status=200,
+        response=f"created customer {r.id}"
+    )
+
+# todo: gitted from now on; not tested
+@app.route('/create_vehicle', methods=['GET'])
+def create_vehicle_page():
+    # todo: <critical> need notes for bike as well
+
+    locations_q = """
+        SELECT id loc_id, name loc_name, address loc_address
+        FROM public.location;
+    """
+
+    with db.connect() as conn:
+        locations = conn.execute(locations_q).fetchall()
+
+    return render_template(
+        'create_vehicle.html',
+        locations=locations
+    )
+
+
+@app.route('/create_vehicle', methods=['post'])
+def create_vehicle():
+    print("form", request.form)
+
+    f = request.form
+
+    stmt = sqlalchemy.text("""
+        INSERT INTO public."bike"(
+            name, mileage, location, plates, notes)
+        VALUES (:name, :mileage, :l_id, :plates, :notes)
+        RETURNING id;
+    """)
+
+    try:
+        with db.connect() as conn:
+            r = conn.execute(
+                stmt, name=f.get('name'), mileage=f.get('mileage'), l_id=f.get('location-id'),
+                plates=f.get('plates'), notes=f.get('notes')
+            ).fetchone()
+    except Exception as e:
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to create a bike"
+        )
+
+    return Response(
+        status=200,
+        response=f"created bike {r.id}"
+    )
+
+
+@app.route('/create_location', methods=['GET'])
+def create_location_page():
+    # todo: <critical> need notes for hotels as well
+    return render_template(
+        'create_location.html'
+    )
+
+
+@app.route('/create_location', methods=['post'])
+def create_location():
+    print("form", request.form)
+
+    f = request.form
+
+    stmt = sqlalchemy.text("""
+        INSERT INTO public."location"(
+            name, address, notes)
+        VALUES (:name, :address, :notes)
+        RETURNING id;
+    """)
+
+    try:
+        with db.connect() as conn:
+            r = conn.execute(
+                stmt, name=f.get('name'), address=f.get('address'), notes=f.get('notes')
+            ).fetchone()
+    except Exception as e:
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to create a location"
+        )
+
+    return Response(
+        status=200,
+        response=f"created location {r.id}"
+    )
+
+# todo: gitted not testes ends
+
 @app.route('/fill_order/<bike_id>', methods=['GET'])
 def fill_order_page(bike_id):
     print('bike id', bike_id)

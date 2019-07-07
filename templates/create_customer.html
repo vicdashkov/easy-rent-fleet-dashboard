@@ -1,0 +1,60 @@
+<html lang="en">
+{% include "head_include.html" %}
+<body>
+<nav class="red lighten-1">
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Create Customer</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="admin_main">Admin Main</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="section">
+    <form class="col s12" action="create_customer" method="post">
+
+        <div class="row">
+            <div class="input-field col s6">
+                <input value="" id="first-name" type="text" name="first-name" required>
+                <label for="first-name">First Name</label>
+            </div>
+            <div class="input-field col s6">
+                <input value="" id="last-name" type="text" name="last-name" required>
+                <label for="last-name">Last Name</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s6">
+                <input value="" id="email" type="text" name="email" required>
+                <label for="email">Email</label>
+            </div>
+            <div class="input-field col s6">
+                <input value="" id="phone" type="text" name="phone" required>
+                <label for="phone">Phone number</label>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="input-field col s12">
+                <select name="location-id">
+                    <option value="" disabled selected>Current Location</option>
+                    {% for l in locations %}
+                    <option value="{{l.loc_id}}">{{l.loc_name}} | {{l.loc_address}}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+        </div>
+
+        <div class="row">
+            <div class="input-field col s12">
+                <input value="" id="notes" type="text" name="notes">
+                <label for="notes">Notes</label>
+            </div>
+        </div>
+
+        <button type="submit">Create Customer</button>
+    </form>
+</div>
+</body>
+</html>
