@@ -14,8 +14,6 @@
 
         <input id="start-datepicker" name="s_date" value="{{start_date}}"
                type="text" class="datepicker datepicker-custom" placeholder="Start Date" required>
-        <input id="end-datepicker" name="e_date" value="{{end_date}}"
-               type="text" class="datepicker datepicker-custom" placeholder="End Date" required>
         <input type="submit" value="Search Date">
 
         <table>
@@ -26,6 +24,9 @@
                 <th>Bike Name</th>
                 <th>Hotel</th>
                 <th>Address</th>
+                <th>Order Start</th>
+                <th>Order End</th>
+                <th>Status</th>
             </tr>
             </thead>
 
@@ -39,6 +40,9 @@
                 <td>{{b.bike_name}}</td>
                 <td>{{b.loc_name}}</td>
                 <td>{{b.loc_address}}</td>
+                <td>{{b.o_start}}</td>
+                <td>{{b.o_end}}</td>
+                <td>{{b.o_status}}</td>
             </tr>
             {% endfor %}
 

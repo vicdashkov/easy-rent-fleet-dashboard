@@ -524,30 +524,28 @@ def available_vehicles():
     q = """  
         select 
             b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
-            l.address loc_address
-        from 
-            "bike" b
-            left join "location" l on b.location = l.id
-        where b.id not in (
-            select distinct b."id" 
-            from bike b
-            left join "order" o on o.bike = b.id
-            where
-                (o.start::date, o.end::date) overlaps (%s::date, %s::date)
-        )
+            l.address loc_address, to_char(o."start", 'DD-MON-YYYY') o_start,
+            to_char(o."end", 'DD-MON-YYYY') o_end, 
+            o.status o_status
+        from bike b
+        left join "location" l on b.location = l.id
+        left join (
+            select * from "order" o
+            where 
+                %s::date between o.start::date and o.end::date
+                or (o.start is null and o.end is null)
+        ) o on b.id = o.bike
        """
 
-    start_date = str(parser.parse(request.args.get('s_date', str(datetime.date.today()))))
-    end_date = str(parser.parse(request.args.get('e_date', str(datetime.date.today() + datetime.timedelta(days=1)))))
+    start_date = parser.parse(request.args.get('s_date', str(datetime.date.today()))).strftime("%d-%b-%Y")
 
     with db.connect() as conn:
-        bikes = conn.execute(q, start_date, end_date).fetchall()
+        available_v = conn.execute(q, start_date).fetchall()
 
     return render_template(
         'available_vehicles.html',
-        available_vehicles=bikes,
-        start_date=start_date,
-        end_date=end_date
+        available_vehicles=available_v,
+        start_date=start_date
     )
 
 
