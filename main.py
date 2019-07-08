@@ -154,9 +154,8 @@ def create_location():
     )
 
 
-@app.route('/fill_order/<bike_id>', methods=['GET'])
-def fill_order_page(bike_id):
-    print('bike id', bike_id)
+@app.route('/order_new/<bike_id>', methods=['GET'])
+def order_new(bike_id):
 
     locations_q = """
         SELECT id loc_id, name loc_name, address loc_address
@@ -204,7 +203,7 @@ def fill_order_page(bike_id):
         customers = conn.execute(customers_q).fetchall()
 
     return render_template(
-        'order.html',
+        'order_new.html',
         locations=locations,
         currencies=currencies,
         bike_data=bike_data,
@@ -213,7 +212,119 @@ def fill_order_page(bike_id):
     )
 
 
-@app.route('/fill_order/', methods=['post'])
+# todo <critical> drop off by date
+# todo <critical> pickup by date
+# todo <critical> keep only in progress and deleted enums
+
+@app.route('/order_edit/<order_id>', methods=['GET'])
+def order_edit(order_id):
+    order_q = """
+        SELECT 
+          b.plates plate, 
+          b.name bike_name, 
+          b.id b_id, 
+          l_s.name loc_s_name, 
+          l_s.address loc_s_address, 
+          l_e.name loc_e_name, 
+          l_e.address loc_e_address, 
+          c.l_name cus_l_name, 
+          c.phone cus_phone, 
+          c.email cus_email,
+          c.f_name cus_f_name, 
+          o."start" o_start, 
+          o."end" o_end, 
+          o.amount::numeric o_amount, 
+          o.a_currency o_a_currency, 
+          o.deposit::numeric o_deposit, 
+          o.d_currency o_d_currency, 
+          o.id order_id, 
+          o.status order_status, 
+          o.notes o_notes,
+          c.id cus_id,
+          l_e.id loc_e_id,
+          l_s.id loc_s_id
+        FROM 
+          "order" o 
+          inner join bike b on o.bike = b.id
+          inner join customer c on o.cus_id = c.id
+          inner join "location" l_s on o.location_start = l_s.id
+          inner join "location" l_e on o.location_end = l_e.id
+        WHERE
+          o.id = %s
+    """
+
+    locations_q = """
+        SELECT id loc_id, name loc_name, address loc_address
+        FROM public.location;
+    """
+
+    currencies_q = """
+        SELECT
+            pg_type.typname, 
+            pg_enum.enumlabel cur_code
+        FROM
+            pg_type 
+        JOIN
+            pg_enum ON pg_enum.enumtypid = pg_type.oid
+        WHERE pg_type.typname = 'currency';
+    """
+
+    statuses_q = """
+            SELECT
+                pg_type.typname, 
+                pg_enum.enumlabel status_code
+            FROM
+                pg_type 
+            JOIN
+                pg_enum ON pg_enum.enumtypid = pg_type.oid
+            WHERE pg_type.typname = 'status';
+        """
+
+    bike_q = """
+        SELECT b.id id, b.name "name", b.mileage mileage, 
+            b.plates plates, l.name l_name, l.address l_address, l.id l_id
+        FROM public.bike b
+        JOIN public.location l on b.location = l.id
+        WHERE b.id=%s;
+    """
+
+    bikes_q = """
+        SELECT b.id id, b.name "name", b.mileage mileage, 
+            b.plates plates, l.name l_name, l.address l_address, l.id l_id
+        FROM public.bike b
+        JOIN public.location l on b.location = l.id
+    """
+
+    customers_q = """
+        SELECT c.id "id", c.l_name l_name, c.f_name f_name, 
+            c.email email, c.phone phone, l.name loc_name
+        FROM public.customer c
+        JOIN public.location l on c.location = l.id;
+    """
+
+    with db.connect() as conn:
+        locations = conn.execute(locations_q).fetchall()
+        currencies = conn.execute(currencies_q).fetchall()
+        order_data = conn.execute(order_q, order_id).fetchone()
+        bike_data = conn.execute(bike_q, order_data.b_id).fetchone()
+        bikes = conn.execute(bikes_q).fetchall()
+        customers = conn.execute(customers_q).fetchall()
+        statuses = conn.execute(statuses_q).fetchall()
+
+    print('order data', order_data)
+    return render_template(
+        'order_edit.html',
+        locations=locations,
+        currencies=currencies,
+        bike_data=bike_data,
+        customers=customers,
+        bikes=bikes,
+        order_data=order_data,
+        statuses=statuses
+    )
+
+
+@app.route('/order/', methods=['post'])
 def fill_order_submit():
     print("form", request.form)
 
@@ -225,11 +336,11 @@ def fill_order_submit():
         INSERT INTO public."order"(
             start, "end", cus_id, amount, mileage_start, 
             mileage_end, bike, notes, location_start, location_end, 
-            deposit, d_currency, assign_p_up, assign_d_off, a_currency,
+            deposit, d_currency, a_currency,
             status)
         VALUES (:start, :end, :cus_id, :amount, :m_start, 
                 :m_end, :bike, :notes, :l_start, :l_end, 
-                :deposit, :dep_curr, :assign_p_up, :assign_d_off, :a_currency, 
+                :deposit, :dep_curr, :a_currency, 
                 'IN_PROGRESS')
         RETURNING id;
     """)
@@ -255,8 +366,6 @@ def fill_order_submit():
                 l_end=f.get('end-location-id'),
                 deposit=f.get('d-amount'),
                 dep_curr=f.get('deposit-cur-code'),
-                assign_p_up=2,
-                assign_d_off=2,
                 a_currency=f.get('amount-cur-code')
             ).fetchone()
             print('result returning', r)
@@ -274,11 +383,13 @@ def fill_order_submit():
     )
 
 
-@app.route('/drop_off_bikes_list', methods=['GET'])
+@app.route('/drop_off_vehicle_list', methods=['GET'])
 def drop_off_bikes_list():
-    # todo: where clouse
-    #  (end date == today)
+    # todo: <critical> where clouse
+    #  (start date == today)
     #  user email == current user)
+    #  and order in not cancelled
+
     q = """
         SELECT 
             b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
@@ -298,15 +409,37 @@ def drop_off_bikes_list():
     )
 
 
-@app.route('/pickup_bikes_list', methods=['GET'])
+@app.route('/pickup_vehicle_list', methods=['GET'])
 def pickup_bikes_list():
-    # todo: where clouse
-    #  (start date == today)
-    #  user email == current user)
+    # todo: <feature> where clouse user email == current user
     q = """
            SELECT 
                b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
                l.address loc_address, c.l_name cus_l_name, o.id order_id
+           FROM 
+               "order" o 
+               inner join bike b on o.bike = b.id
+               inner join customer c on o.cus_id = c.id
+               inner join "location" l on o.location_start = l.id
+           WHERE
+                o.end=%s AND o.status != 'DELETED'
+       """
+    with db.connect() as conn:
+        orders = conn.execute(q, datetime.date.today()).fetchall()
+
+    return render_template(
+        'pickup_bikes_list.html',
+        orders=orders
+    )
+
+
+@app.route('/order_list', methods=['GET'])
+def orders_list():
+    q = """
+           SELECT 
+               b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+               l.address loc_address, c.l_name cus_l_name, o.id order_id, o.status order_status,
+               o.start start_date, o."end" end_date
            FROM 
                "order" o 
                inner join bike b on o.bike = b.id
@@ -317,87 +450,155 @@ def pickup_bikes_list():
         orders = conn.execute(q).fetchall()
 
     return render_template(
-        'pickup_bikes_list.html',
+        'orders_list.html',
         orders=orders
     )
 
 
-@app.route('/available_bikes', methods=['GET'])
-def available_bikes():
-    # todo: need to test it thoroughly
+@app.route('/order_update', methods=['post'])
+def change_order():
+    f = request.form
 
-    # I want to see a bike that is not in orders
-    # and
-    # in orders but start date > today
-    # in orders but end date is not overlapping
-    # todo: where clouse complete
+    start_date = parser.parse(f.get('start-date'))
+    end_date = parser.parse(f.get('end-date'))
+    order_id = f.get('order-id')
+    stmt = sqlalchemy.text("""
+        UPDATE public."order"
+        SET
+            "start"=:start,
+            "end"=:end,
+            cus_id=:cus_id,
+            amount=:amount,
+            mileage_start=:m_start,
+            mileage_end=:m_end,
+            bike=:bike,
+            notes=:notes,
+            location_start=:l_start,
+            location_end=:l_end,
+            deposit=:deposit,
+            d_currency=:dep_curr,
+            a_currency=:a_currency,
+            status=:status
+        WHERE
+            "id"=:order_id
+        """)
+    try:
+        with db.connect() as conn:
+            conn.execute(
+                stmt,
+                start=start_date,
+                end=end_date,
+                cus_id=f.get('customer-id'),
+                amount=f.get('t-amount'),
+                m_start=f.get('bike-mileage'),
+                m_end=f.get('bike-mileage'),
+                bike=f.get('bike-id'),
+                notes=f.get('notes'),
+                l_start=f.get('start-location-id'),
+                l_end=f.get('end-location-id'),
+                deposit=f.get('d-amount'),
+                dep_curr=f.get('deposit-cur-code'),
+                a_currency=f.get('amount-cur-code'),
+                order_id=order_id,
+                status=f.get('order-status')
+            )
+    except Exception as e:
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to successfully update order"
+        )
 
-    # todo: make sure returns only one bike
-
-    # todo: don't forget: SELECT ('2001-02-16'::date, '2001-12-21'::date) OVERLAPS ('2001-12-21'::date, '2002-10-30'::date); --> false
-    # start <= time < end.
-
-    q = """
-        SELECT 
-           b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
-           l.address loc_address, o.id order_id
-        FROM 
-           "bike" b
-           left join "order" o on o.bike = b.id
-           left join "location" l on o.location_start = l.id
-        WHERE 
-            (not (o.start::date, o.end::date) overlaps (%s::date, %s::date))
-            or (o.start is null and o.end is null)
-       """
-
-    start_date = parser.parse(request.args.get('s_date', str(datetime.date.today())))
-    end_date = parser.parse(request.args.get('e_date', str(datetime.date.today() + datetime.timedelta(days=1))))
-    print('s_d / e_d', start_date, end_date)
-
-    with db.connect() as conn:
-        bikes = conn.execute(q, str(start_date), str(end_date)).fetchall()
-
-    return render_template(
-        'available_bikes.html',
-        available_bikes=bikes
+    return Response(
+        status=200,
+        response=f"updated order {order_id}. the order is now active"
     )
 
 
-@app.route('/hand_off_bike/<order_id>', methods=['GET'])
-def hand_off_bike(order_id):
+@app.route('/available_vehicles', methods=['GET'])
+def available_vehicles():
+    # todo: <feature> need to test it thoroughly
+
+    # todo: <critica> displya all bikes and order info if any by only start date
+
+    q = """  
+        select 
+            b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+            l.address loc_address
+        from 
+            "bike" b
+            left join "location" l on b.location = l.id
+        where b.id not in (
+            select distinct b."id" 
+            from bike b
+            left join "order" o on o.bike = b.id
+            where
+                (o.start::date, o.end::date) overlaps (%s::date, %s::date)
+        )
+       """
+
+    start_date = str(parser.parse(request.args.get('s_date', str(datetime.date.today()))))
+    end_date = str(parser.parse(request.args.get('e_date', str(datetime.date.today() + datetime.timedelta(days=1)))))
+
+    with db.connect() as conn:
+        bikes = conn.execute(q, start_date, end_date).fetchall()
+
+    return render_template(
+        'available_vehicles.html',
+        available_vehicles=bikes,
+        start_date=start_date,
+        end_date=end_date
+    )
+
+
+@app.route('/hand_off_vehicle/<order_id>', methods=['GET'])
+def hand_off_vehicle(order_id):
     q = """
         SELECT 
             b.plates plates, c.l_name l_name, c.f_name f_name, l.name loc_name, l.address loc_address,
             b.mileage mileage, o.start "start", o."end" "end", b.name b_name, o.deposit deposit, 
-            o.d_currency d_curr, o.amount amount, o.a_currency a_currency
+            o.d_currency d_curr, o.amount amount, o.a_currency a_currency, o.id order_id,
+            b.id bike_id
         FROM 
             "order" o 
             inner join bike b on o.bike = b.id
             inner join customer c on o.cus_id = c.id
             inner join "location" l on o.location_start = l.id
         WHERE 
-            o.id = %s
+            b.id = %s
     """
 
     with db.connect() as conn:
         data = conn.execute(q, order_id).fetchone()
 
     return render_template(
-        'hand_off_bike.html',
+        'hand_off_vehicle.html',
         form_data=data
     )
 
 
-@app.route('/hand_off_bike/<order_id>', methods=['POST'])
-def hand_off_bike_start(order_id):
-    stmt = sqlalchemy.text("""
+@app.route('/hand_off_vehicle/<order_id>', methods=['POST'])
+def hand_off_vehicle_start(order_id):
+    print("form", request.form, order_id)
+    f = request.form
+    stmt_order = sqlalchemy.text("""
         UPDATE "order"
-        SET "status" = 'IN_PROGRESS'
+        SET 
+            "status"='IN_PROGRESS',
+            "mileage_start"=:m_start
         WHERE "id" = :order_id
         """)
+
+    stmt_bike = sqlalchemy.text("""
+            UPDATE "bike"
+            SET 
+                "mileage"=:m
+            WHERE "id" = :bike_id
+            """)
     try:
         with db.connect() as conn:
-            conn.execute(stmt, order_id=order_id)
+            conn.execute(stmt_order, order_id=order_id, m_start=f.get('current-mileage'))
+            conn.execute(stmt_bike, bike_id=f.get('bike-id'), m=f.get('current-mileage'))
     except Exception as e:
         logger.exception(e)
         return Response(
@@ -417,14 +618,14 @@ def pickup_bike(order_id):
         SELECT 
             b.plates plates, c.l_name l_name, c.f_name f_name, l.name loc_name, l.address loc_address,
             b.mileage mileage, o.start "start", o."end" "end", b.name b_name, o.deposit deposit, 
-            o.d_currency d_curr, o.amount amount, o.a_currency a_currency
+            o.d_currency d_curr, o.amount amount, o.a_currency a_currency, b.id bike_id
         FROM 
             "order" o 
             inner join bike b on o.bike = b.id
             inner join customer c on o.cus_id = c.id
-            inner join "location" l on o.location_start = l.id
+            inner join "location" l on o.location_end = l.id
         WHERE 
-            o.id = %s
+            b.id = %s
     """
 
     with db.connect() as conn:
@@ -433,6 +634,41 @@ def pickup_bike(order_id):
     return render_template(
         'pickup_bike.html',
         form_data=data
+    )
+
+
+@app.route('/pickup_bike/<order_id>', methods=['POST'])
+def pickup_bike_start(order_id):
+    print("form", request.form, order_id)
+    f = request.form
+    stmt_order = sqlalchemy.text("""
+        UPDATE "order"
+        SET 
+            "status"='IN_PROGRESS',
+            "mileage_end"=:m_end
+        WHERE "id" = :order_id
+        """)
+
+    stmt_bike = sqlalchemy.text("""
+            UPDATE "bike"
+            SET 
+                "mileage"=:m
+            WHERE "id" = :bike_id
+            """)
+    try:
+        with db.connect() as conn:
+            conn.execute(stmt_order, order_id=order_id, m_end=f.get('current-mileage'))
+            conn.execute(stmt_bike, bike_id=f.get('bike-id'), m=f.get('current-mileage'))
+    except Exception as e:
+        logger.exception(e)
+        return Response(
+            status=500,
+            response="Unable to successfully update order"
+        )
+
+    return Response(
+        status=200,
+        response=f"updated order {order_id}. the order is now active"
     )
 
 
@@ -450,5 +686,6 @@ def admin_main():
     )
 
 
+# todo: <feature> rename public.bike -> public.vehicle
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)

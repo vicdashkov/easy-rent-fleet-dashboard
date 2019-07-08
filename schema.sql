@@ -110,3 +110,9 @@ ALTER TABLE public.bike
 
 ALTER TABLE public.location
     ADD COLUMN notes text;
+
+ALTER TABLE public."order"
+    ALTER COLUMN assign_p_up DROP NOT NULL;
+
+ALTER TABLE public."order"
+    ALTER COLUMN assign_d_off DROP NOT NULL;
