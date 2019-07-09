@@ -3,7 +3,7 @@
 <body>
 <nav class="red lighten-1">
     <div class="nav-wrapper">
-        <a href="#" class="brand-logo center">Bikes to drop off today</a>
+        <a href="#" class="brand-logo center">Vehicles to deliver to customers</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
             <li><a href="pickup_vehicle_list">Bikes to be picked up</a></li>
             <li><a href="/">Main</a></li>
@@ -11,26 +11,32 @@
     </div>
 </nav>
 <div class="section">
-    <table>
+    <form action="" method="get">
+        <input id="start-datepicker" name="date" value="{{date}}"
+               type="text" class="datepicker datepicker-custom" placeholder="Rental Start Date" required>
+        <input type="submit" value="Search Rental Start Date">
 
-        <thead>
-        <tr>
-            <th>Plate</th>
-            <th>Hotel</th>
-            <th>Address</th>
-        </tr>
-        </thead>
+        <table>
 
-        <tbody>
-        {% for o in orders %}
-        <tr>
-            <td><b><a href="/hand_off_vehicle/{{o.b_id}}"> {{o.plate}}</a></b></td>
-            <td>{{o.loc_name}}</td>
-            <td>{{o.loc_address}}</td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+            <thead>
+            <tr>
+                <th>Plate</th>
+                <th>Hotel</th>
+                <th>Address</th>
+            </tr>
+            </thead>
+
+            <tbody>
+            {% for o in orders %}
+            <tr>
+                <td><b><a href="/hand_off_vehicle/{{o.b_id}}"> {{o.plate}}</a></b></td>
+                <td>{{o.loc_name}}</td>
+                <td>{{o.loc_address}}</td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </form>
 </div>
 </body>
 </html>
