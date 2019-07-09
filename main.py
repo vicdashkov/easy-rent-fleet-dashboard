@@ -228,8 +228,8 @@ def order_edit(order_id):
           c.phone cus_phone, 
           c.email cus_email,
           c.f_name cus_f_name, 
-          {get_sql_date_formatted('o."start"', 'o_start')}
-          {get_sql_date_formatted('o."end"', 'o_end')}
+          {get_sql_date_formatted('o."start"', 'o_start')},
+          {get_sql_date_formatted('o."end"', 'o_end')},
           o.amount::numeric o_amount, 
           o.a_currency o_a_currency, 
           o.deposit::numeric o_deposit, 
