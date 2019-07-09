@@ -156,7 +156,6 @@ def create_location():
 
 @app.route('/order_new/<bike_id>', methods=['GET'])
 def order_new(bike_id):
-
     locations_q = """
         SELECT id loc_id, name loc_name, address loc_address
         FROM public.location;
@@ -347,9 +346,6 @@ def fill_order_submit():
     start_date = parser.parse(f.get('start-date'))
     end_date = parser.parse(f.get('end-date'))
 
-    # todo: <feature> assing d off pp
-    # todo: <feature> assing p up pp
-
     try:
         with db.connect() as conn:
             r = conn.execute(
@@ -385,10 +381,7 @@ def fill_order_submit():
 
 @app.route('/drop_off_vehicle_list', methods=['GET'])
 def drop_off_bikes_list():
-    # todo: <critical> where clouse
-    #  (start date == today)
-    #  user email == current user)
-    #  and order in not cancelled
+    d = get_req_date_or_today('date')
 
     q = """
         SELECT 
@@ -399,19 +392,23 @@ def drop_off_bikes_list():
             inner join bike b on o.bike = b.id
             inner join customer c on o.cus_id = c.id
             inner join "location" l on o.location_start = l.id
+        WHERE
+            o.start = %s AND o.status != 'DELETED'
     """
     with db.connect() as conn:
-        orders = conn.execute(q).fetchall()
+        orders = conn.execute(q, d).fetchall()
 
     return render_template(
         'drop_off_bikes_list.html',
-        orders=orders
+        orders=orders,
+        date=d
     )
 
 
 @app.route('/pickup_vehicle_list', methods=['GET'])
 def pickup_bikes_list():
-    # todo: <feature> where clouse user email == current user
+    d = get_req_date_or_today('date')
+
     q = """
            SELECT 
                b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
@@ -425,11 +422,12 @@ def pickup_bikes_list():
                 o.end=%s AND o.status != 'DELETED'
        """
     with db.connect() as conn:
-        orders = conn.execute(q, datetime.date.today()).fetchall()
+        orders = conn.execute(q, d).fetchall()
 
     return render_template(
         'pickup_bikes_list.html',
-        orders=orders
+        orders=orders,
+        date=d
     )
 
 
@@ -439,7 +437,8 @@ def orders_list():
            SELECT 
                b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
                l.address loc_address, c.l_name cus_l_name, o.id order_id, o.status order_status,
-               o.start start_date, o."end" end_date
+               to_char(o."end", 'DD-MON-YYYY') end_date,
+               to_char(o."start", 'DD-MON-YYYY') start_date
            FROM 
                "order" o 
                inner join bike b on o.bike = b.id
@@ -517,10 +516,6 @@ def change_order():
 
 @app.route('/available_vehicles', methods=['GET'])
 def available_vehicles():
-    # todo: <feature> need to test it thoroughly
-
-    # todo: <critica> displya all bikes and order info if any by only start date
-
     q = """  
         select 
             b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
@@ -537,7 +532,7 @@ def available_vehicles():
         ) o on b.id = o.bike
        """
 
-    start_date = parser.parse(request.args.get('s_date', str(datetime.date.today()))).strftime("%d-%b-%Y")
+    start_date = get_req_date_or_today('s_date')
 
     with db.connect() as conn:
         available_v = conn.execute(q, start_date).fetchall()
@@ -682,6 +677,10 @@ def admin_main():
     return render_template(
         'admin_index.html'
     )
+
+
+def get_req_date_or_today(query_name):
+    return parser.parse(request.args.get(query_name, str(datetime.date.today()))).strftime("%d-%b-%Y")
 
 
 # todo: <feature> rename public.bike -> public.vehicle
