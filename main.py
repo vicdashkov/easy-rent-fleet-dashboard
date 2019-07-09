@@ -10,6 +10,17 @@ db_user = os.environ.get("DB_USER")
 db_pass = os.environ.get("DB_PASS")
 db_name = os.environ.get("DB_NAME")
 cloud_sql_connection_name = os.environ.get("CLOUD_SQL_CONNECTION_NAME")
+if db_user:
+    cloud_sql_connection_name = sqlalchemy.engine.url.URL(
+        drivername='postgres+pg8000',
+        username=db_user,
+        password=db_pass,
+        database=db_name,
+        query={
+            'unix_sock': '/cloudsql/{}/.s.PGSQL.5432'.format(
+                cloud_sql_connection_name)
+        }
+    )
 
 app = Flask(__name__)
 
@@ -204,7 +215,7 @@ def order_new(vehicle_id):
 
 @app.route('/order_edit/<order_id>', methods=['GET'])
 def order_edit(order_id):
-    order_q = """
+    order_q = f"""
         SELECT 
           b.plates plate, 
           b.name vehicle_name, 
@@ -217,8 +228,8 @@ def order_edit(order_id):
           c.phone cus_phone, 
           c.email cus_email,
           c.f_name cus_f_name, 
-          o."start" o_start, 
-          o."end" o_end, 
+          {get_sql_date_formatted('o."start"', 'o_start')}
+          {get_sql_date_formatted('o."end"', 'o_end')}
           o.amount::numeric o_amount, 
           o.a_currency o_a_currency, 
           o.deposit::numeric o_deposit, 
@@ -293,7 +304,7 @@ def order_edit(order_id):
         currencies = conn.execute(currencies_q).fetchall()
         order_data = conn.execute(order_q, order_id).fetchone()
         vehicle_data = conn.execute(vehicle_q, order_data.b_id).fetchone()
-        vehicles = conn.execute(vehicle_q).fetchall()
+        vehicles = conn.execute(vehicles_q).fetchall()
         customers = conn.execute(customers_q).fetchall()
         statuses = conn.execute(statuses_q).fetchall()
 
