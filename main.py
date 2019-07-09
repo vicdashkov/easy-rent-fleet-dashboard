@@ -91,7 +91,7 @@ def create_vehicle():
     f = request.form
 
     stmt = sqlalchemy.text("""
-        INSERT INTO public."bike"(
+        INSERT INTO public."vehicle"(
             name, mileage, location, plates, notes)
         VALUES (:name, :mileage, :l_id, :plates, :notes)
         RETURNING id;
@@ -154,8 +154,8 @@ def create_location():
     )
 
 
-@app.route('/order_new/<bike_id>', methods=['GET'])
-def order_new(bike_id):
+@app.route('/order_new/<vehicle_id>', methods=['GET'])
+def order_new(vehicle_id):
     locations_q = """
         SELECT id loc_id, name loc_name, address loc_address
         FROM public.location;
@@ -172,19 +172,19 @@ def order_new(bike_id):
         WHERE pg_type.typname = 'currency';
     """
 
-    bike_q = """
+    vehicle_q = """
         SELECT b.id id, b.name "name", b.mileage mileage, 
             b.plates plates, l.name l_name, l.address l_address, l.id l_id
-        FROM public.bike b
+        FROM public.vehicle b
         JOIN public.location l on b.location = l.id
         WHERE b.id=%s;
     """
 
-    bikes_q = """
-        SELECT b.id id, b.name "name", b.mileage mileage, 
-            b.plates plates, l.name l_name, l.address l_address, l.id l_id
-        FROM public.bike b
-        JOIN public.location l on b.location = l.id
+    vehicles_q = """
+        SELECT v.id id, v.name "name", v.mileage mileage, 
+            v.plates plates, l.name l_name, l.address l_address, l.id l_id
+        FROM public.vehicle v
+        JOIN public.location l on v.location = l.id
     """
 
     customers_q = """
@@ -197,30 +197,26 @@ def order_new(bike_id):
     with db.connect() as conn:
         locations = conn.execute(locations_q).fetchall()
         currencies = conn.execute(currencies_q).fetchall()
-        bike_data = conn.execute(bike_q, bike_id).fetchone()
-        bikes = conn.execute(bikes_q).fetchall()
+        vehicle_data = conn.execute(vehicle_q, vehicle_id).fetchone()
+        vehicles = conn.execute(vehicles_q).fetchall()
         customers = conn.execute(customers_q).fetchall()
 
     return render_template(
         'order_new.html',
         locations=locations,
         currencies=currencies,
-        bike_data=bike_data,
+        vehicle_data=vehicle_data,
         customers=customers,
-        bikes=bikes
+        vehicles=vehicles
     )
 
-
-# todo <critical> drop off by date
-# todo <critical> pickup by date
-# todo <critical> keep only in progress and deleted enums
 
 @app.route('/order_edit/<order_id>', methods=['GET'])
 def order_edit(order_id):
     order_q = """
         SELECT 
           b.plates plate, 
-          b.name bike_name, 
+          b.name vehicle_name, 
           b.id b_id, 
           l_s.name loc_s_name, 
           l_s.address loc_s_address, 
@@ -244,7 +240,7 @@ def order_edit(order_id):
           l_s.id loc_s_id
         FROM 
           "order" o 
-          inner join bike b on o.bike = b.id
+          inner join vehicle b on o.vehicle = b.id
           inner join customer c on o.cus_id = c.id
           inner join "location" l_s on o.location_start = l_s.id
           inner join "location" l_e on o.location_end = l_e.id
@@ -279,18 +275,18 @@ def order_edit(order_id):
             WHERE pg_type.typname = 'status';
         """
 
-    bike_q = """
+    vehicle_q = """
         SELECT b.id id, b.name "name", b.mileage mileage, 
             b.plates plates, l.name l_name, l.address l_address, l.id l_id
-        FROM public.bike b
+        FROM public.vehicle b
         JOIN public.location l on b.location = l.id
         WHERE b.id=%s;
     """
 
-    bikes_q = """
+    vehicles_q = """
         SELECT b.id id, b.name "name", b.mileage mileage, 
             b.plates plates, l.name l_name, l.address l_address, l.id l_id
-        FROM public.bike b
+        FROM public.vehicle b
         JOIN public.location l on b.location = l.id
     """
 
@@ -305,8 +301,8 @@ def order_edit(order_id):
         locations = conn.execute(locations_q).fetchall()
         currencies = conn.execute(currencies_q).fetchall()
         order_data = conn.execute(order_q, order_id).fetchone()
-        bike_data = conn.execute(bike_q, order_data.b_id).fetchone()
-        bikes = conn.execute(bikes_q).fetchall()
+        vehicle_data = conn.execute(vehicle_q, order_data.b_id).fetchone()
+        vehicles = conn.execute(vehicle_q).fetchall()
         customers = conn.execute(customers_q).fetchall()
         statuses = conn.execute(statuses_q).fetchall()
 
@@ -315,30 +311,30 @@ def order_edit(order_id):
         'order_edit.html',
         locations=locations,
         currencies=currencies,
-        bike_data=bike_data,
+        vehicle_data=vehicle_data,
         customers=customers,
-        bikes=bikes,
+        vehicles=vehicles,
         order_data=order_data,
         statuses=statuses
     )
 
 
-@app.route('/order/', methods=['post'])
+@app.route('/order', methods=['post'])
 def fill_order_submit():
     print("form", request.form)
 
-    # todo: <feature> need to check if the bike can be inserted
+    # todo: <feature> need to check if the vehiclecan be inserted
 
     f = request.form
 
     stmt = sqlalchemy.text("""
         INSERT INTO public."order"(
             start, "end", cus_id, amount, mileage_start, 
-            mileage_end, bike, notes, location_start, location_end, 
+            mileage_end, vehicle, notes, location_start, location_end, 
             deposit, d_currency, a_currency,
             status)
         VALUES (:start, :end, :cus_id, :amount, :m_start, 
-                :m_end, :bike, :notes, :l_start, :l_end, 
+                :m_end, :vehicle, :notes, :l_start, :l_end, 
                 :deposit, :dep_curr, :a_currency, 
                 'IN_PROGRESS')
         RETURNING id;
@@ -354,9 +350,9 @@ def fill_order_submit():
                 end=end_date,
                 cus_id=f.get('customer-id'),
                 amount=f.get('t-amount'),
-                m_start=f.get('bike-mileage'),
-                m_end=f.get('bike-mileage'),
-                bike=f.get('bike-id'),
+                m_start=f.get('vehicle-mileage'),
+                m_end=f.get('vehicle-mileage'),
+                vehicle=f.get('vehicle-id'),
                 notes=f.get('notes'),
                 l_start=f.get('start-location-id'),
                 l_end=f.get('end-location-id'),
@@ -379,17 +375,17 @@ def fill_order_submit():
     )
 
 
-@app.route('/drop_off_vehicle_list', methods=['GET'])
-def drop_off_bikes_list():
+@app.route('/drop_off_vehicles_list', methods=['GET'])
+def drop_off_vehicles_list():
     d = get_req_date_or_today('date')
 
     q = """
         SELECT 
-            b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+            b.plates plate, b.name vehicle_name, b.id b_id, l.name loc_name, 
             l.address loc_address, c.l_name cus_l_name, o.id order_id
         FROM 
             "order" o 
-            inner join bike b on o.bike = b.id
+            inner join vehicle b on o.vehicle = b.id
             inner join customer c on o.cus_id = c.id
             inner join "location" l on o.location_start = l.id
         WHERE
@@ -399,23 +395,23 @@ def drop_off_bikes_list():
         orders = conn.execute(q, d).fetchall()
 
     return render_template(
-        'drop_off_bikes_list.html',
+        'drop_off_vehicles_list.html',
         orders=orders,
         date=d
     )
 
 
 @app.route('/pickup_vehicle_list', methods=['GET'])
-def pickup_bikes_list():
+def pickup_vehicles_list():
     d = get_req_date_or_today('date')
 
     q = """
            SELECT 
-               b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+               b.plates plate, b.name vehicle_name, b.id b_id, l.name loc_name, 
                l.address loc_address, c.l_name cus_l_name, o.id order_id
            FROM 
                "order" o 
-               inner join bike b on o.bike = b.id
+               inner join vehicle b on o.vehicle = b.id
                inner join customer c on o.cus_id = c.id
                inner join "location" l on o.location_start = l.id
            WHERE
@@ -425,7 +421,7 @@ def pickup_bikes_list():
         orders = conn.execute(q, d).fetchall()
 
     return render_template(
-        'pickup_bikes_list.html',
+        'pickup_vehicles_list.html',
         orders=orders,
         date=d
     )
@@ -433,15 +429,15 @@ def pickup_bikes_list():
 
 @app.route('/order_list', methods=['GET'])
 def orders_list():
-    q = """
+    q = f"""
            SELECT 
-               b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
+               b.plates plate, b.name vehicle_name, b.id b_id, l.name loc_name, 
                l.address loc_address, c.l_name cus_l_name, o.id order_id, o.status order_status,
-               to_char(o."end", 'DD-MON-YYYY') end_date,
-               to_char(o."start", 'DD-MON-YYYY') start_date
+               {get_sql_date_formatted('o."end"', 'end_date')},
+               {get_sql_date_formatted('o."start"', 'start_date')}
            FROM 
                "order" o 
-               inner join bike b on o.bike = b.id
+               inner join vehicle b on o.vehicle = b.id
                inner join customer c on o.cus_id = c.id
                inner join "location" l on o.location_start = l.id
        """
@@ -470,7 +466,7 @@ def change_order():
             amount=:amount,
             mileage_start=:m_start,
             mileage_end=:m_end,
-            bike=:bike,
+            vehicle=:vehicle,
             notes=:notes,
             location_start=:l_start,
             location_end=:l_end,
@@ -489,9 +485,9 @@ def change_order():
                 end=end_date,
                 cus_id=f.get('customer-id'),
                 amount=f.get('t-amount'),
-                m_start=f.get('bike-mileage'),
-                m_end=f.get('bike-mileage'),
-                bike=f.get('bike-id'),
+                m_start=f.get('vehicle-mileage'),
+                m_end=f.get('vehicle-mileage'),
+                vehicle=f.get('vehicle-id'),
                 notes=f.get('notes'),
                 l_start=f.get('start-location-id'),
                 l_end=f.get('end-location-id'),
@@ -516,20 +512,21 @@ def change_order():
 
 @app.route('/available_vehicles', methods=['GET'])
 def available_vehicles():
-    q = """  
+    q = f"""  
         select 
-            b.plates plate, b.name bike_name, b.id b_id, l.name loc_name, 
-            l.address loc_address, to_char(o."start", 'DD-MON-YYYY') o_start,
-            to_char(o."end", 'DD-MON-YYYY') o_end, 
+            b.plates plate, b.name vehicle_name, b.id b_id, l.name loc_name, 
+            l.address loc_address, 
+            {get_sql_date_formatted('o."end"', 'o_end')},
+            {get_sql_date_formatted('o."start"', 'o_start')},
             o.status o_status
-        from bike b
+        from vehicle b
         left join "location" l on b.location = l.id
         left join (
             select * from "order" o
             where 
                 %s::date between o.start::date and o.end::date
                 or (o.start is null and o.end is null)
-        ) o on b.id = o.bike
+        ) o on b.id = o.vehicle
        """
 
     start_date = get_req_date_or_today('s_date')
@@ -551,10 +548,10 @@ def hand_off_vehicle(order_id):
             b.plates plates, c.l_name l_name, c.f_name f_name, l.name loc_name, l.address loc_address,
             b.mileage mileage, o.start "start", o."end" "end", b.name b_name, o.deposit deposit, 
             o.d_currency d_curr, o.amount amount, o.a_currency a_currency, o.id order_id,
-            b.id bike_id
+            b.id vehicle_id
         FROM 
             "order" o 
-            inner join bike b on o.bike = b.id
+            inner join vehicle b on o.vehicle = b.id
             inner join customer c on o.cus_id = c.id
             inner join "location" l on o.location_start = l.id
         WHERE 
@@ -577,21 +574,21 @@ def hand_off_vehicle_start(order_id):
     stmt_order = sqlalchemy.text("""
         UPDATE "order"
         SET 
-            "status"='IN_PROGRESS',
+            "status"='ENDED',
             "mileage_start"=:m_start
         WHERE "id" = :order_id
         """)
 
-    stmt_bike = sqlalchemy.text("""
-            UPDATE "bike"
+    stmt_vehicle = sqlalchemy.text("""
+            UPDATE "vehicle"
             SET 
                 "mileage"=:m
-            WHERE "id" = :bike_id
+            WHERE "id" = :vehicle_id
             """)
     try:
         with db.connect() as conn:
             conn.execute(stmt_order, order_id=order_id, m_start=f.get('current-mileage'))
-            conn.execute(stmt_bike, bike_id=f.get('bike-id'), m=f.get('current-mileage'))
+            conn.execute(stmt_vehicle, vehicle_id=f.get('vehicle-id'), m=f.get('current-mileage'))
     except Exception as e:
         logger.exception(e)
         return Response(
@@ -605,16 +602,19 @@ def hand_off_vehicle_start(order_id):
     )
 
 
-@app.route('/pickup_bike/<order_id>', methods=['GET'])
-def pickup_bike(order_id):
-    q = """
+@app.route('/pickup_vehicle/<order_id>', methods=['GET'])
+def pickup_vehicle(order_id):
+    q = f"""
         SELECT 
             b.plates plates, c.l_name l_name, c.f_name f_name, l.name loc_name, l.address loc_address,
-            b.mileage mileage, o.start "start", o."end" "end", b.name b_name, o.deposit deposit, 
-            o.d_currency d_curr, o.amount amount, o.a_currency a_currency, b.id bike_id
+            b.mileage mileage, 
+            {get_sql_date_formatted('o."end"', '"end"')},
+            {get_sql_date_formatted('o."start"', '"start"')},
+            b.name b_name, o.deposit deposit, 
+            o.d_currency d_curr, o.amount amount, o.a_currency a_currency, b.id vehicle_id
         FROM 
             "order" o 
-            inner join bike b on o.bike = b.id
+            inner join vehicle b on o.vehicle = b.id
             inner join customer c on o.cus_id = c.id
             inner join "location" l on o.location_end = l.id
         WHERE 
@@ -625,13 +625,13 @@ def pickup_bike(order_id):
         data = conn.execute(q, order_id).fetchone()
 
     return render_template(
-        'pickup_bike.html',
+        'pickup_vehicle.html',
         form_data=data
     )
 
 
-@app.route('/pickup_bike/<order_id>', methods=['POST'])
-def pickup_bike_start(order_id):
+@app.route('/pickup_vehicle/<order_id>', methods=['POST'])
+def pickup_vehicle_start(order_id):
     print("form", request.form, order_id)
     f = request.form
     stmt_order = sqlalchemy.text("""
@@ -642,16 +642,16 @@ def pickup_bike_start(order_id):
         WHERE "id" = :order_id
         """)
 
-    stmt_bike = sqlalchemy.text("""
-            UPDATE "bike"
+    stmt_vehicle = sqlalchemy.text("""
+            UPDATE "vehicle"
             SET 
                 "mileage"=:m
-            WHERE "id" = :bike_id
+            WHERE "id" = :vehicle_id
             """)
     try:
         with db.connect() as conn:
             conn.execute(stmt_order, order_id=order_id, m_end=f.get('current-mileage'))
-            conn.execute(stmt_bike, bike_id=f.get('bike-id'), m=f.get('current-mileage'))
+            conn.execute(stmt_vehicle, vehicle_id=f.get('vehicle-id'), m=f.get('current-mileage'))
     except Exception as e:
         logger.exception(e)
         return Response(
@@ -683,6 +683,13 @@ def get_req_date_or_today(query_name):
     return parser.parse(request.args.get(query_name, str(datetime.date.today()))).strftime("%d-%b-%Y")
 
 
-# todo: <feature> rename public.bike -> public.vehicle
+def get_sql_date_formatted(column, alias):
+    return f"""to_char({column}, 'DD-MON-YYYY') {alias}"""
+
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=8080, debug=True)
+
+# todo <feature> rename PENDING enum value into SUBMITTED
+# todo <feature> vehicle type
+# todo <feature> usr mngtm

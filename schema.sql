@@ -1,12 +1,11 @@
--- todo: delete this file
-CREATE TABLE public.bike
+CREATE TABLE public.vehicle
 (
     id serial NOT NULL,
     name character varying COLLATE pg_catalog."default" NOT NULL,
     mileage integer NOT NULL,
     location integer NOT NULL,
     plates character varying COLLATE pg_catalog."default" NOT NULL,
-    CONSTRAINT bike_pkey PRIMARY KEY (id),
+    CONSTRAINT vehicle_pkey PRIMARY KEY (id),
     CONSTRAINT location FOREIGN KEY (location)
         REFERENCES public.location (id) MATCH SIMPLE
         ON UPDATE NO ACTION
@@ -38,7 +37,7 @@ CREATE TABLE public."order"
     amount money NOT NULL,
     mileage_start integer NOT NULL,
     mileage_end integer NOT NULL,
-    bike integer NOT NULL,
+    vehicleinteger NOT NULL,
     notes character varying COLLATE pg_catalog."default",
     location_start integer NOT NULL,
     location_end integer NOT NULL,
@@ -47,8 +46,8 @@ CREATE TABLE public."order"
     assign_p_up integer NOT NULL,
     assign_d_off integer NOT NULL,
     CONSTRAINT order_pkey PRIMARY KEY (id),
-    CONSTRAINT bike FOREIGN KEY (bike)
-        REFERENCES public.bike (id) MATCH SIMPLE
+    CONSTRAINT vehicleFOREIGN KEY (vehicle)
+        REFERENCES public.vehicle (id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT cus FOREIGN KEY (cus_id)
@@ -94,7 +93,7 @@ CREATE TYPE public.currency AS ENUM
     ('USD', 'THB', 'RUB');
 
 CREATE TYPE public.status AS ENUM
-    ('IN_PROGRESS', 'PENDING', 'DELETED');
+    ('IN_PROGRESS', 'SUBMITTED', 'DELETED', 'ENDED');
 
 ALTER TABLE public."order"
     RENAME currency TO d_currency;
@@ -105,7 +104,7 @@ ALTER TABLE public."order"
 ALTER TABLE public."order"
     ADD COLUMN status status NOT NULL;
 
-ALTER TABLE public.bike
+ALTER TABLE public.vehicle
     ADD COLUMN notes text;
 
 ALTER TABLE public.location

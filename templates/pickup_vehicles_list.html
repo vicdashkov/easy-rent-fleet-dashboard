@@ -3,9 +3,9 @@
 <body>
 <nav class="red lighten-1">
     <div class="nav-wrapper">
-        <a href="#" class="brand-logo center">Bikes to pick up from customers</a>
+        <a href="#" class="brand-logo center">vehicles to pick up from customers</a>
         <ul id="nav-mobile" class="right hide-on-med-and-down">
-            <li><a href="drop_off_vehicles_list">Bikes to be dropped off</a></li>
+            <li><a href="drop_off_vehicles_list">vehicles to be dropped off</a></li>
             <li><a href="/">Main</a></li>
         </ul>
     </div>
@@ -28,7 +28,7 @@
             <tbody>
             {% for o in orders %}
             <tr>
-                <td><strong><a href="/pickup_bike/{{o.b_id}}"> {{o.plate}}</a></strong></td>
+                <td><strong><a href="/pickup_vehicle/{{o.b_id}}"> {{o.plate}}</a></strong></td>
                 <td>{{o.loc_name}}</td>
                 <td>{{o.loc_address}}</td>
             </tr>

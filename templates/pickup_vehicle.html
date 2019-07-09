@@ -3,7 +3,7 @@
 <body>
 <nav class="red lighten-1">
     <div class="nav-wrapper">
-        <a href="#" class="brand-logo center">Pikup a bike from a customer</a>
+        <a href="#" class="brand-logo center">Pikup a vehiclefrom a customer</a>
     </div>
 </nav>
 <div class="section">
@@ -12,16 +12,14 @@
         <table>
             <tbody>
             <tr>
-                <td>Bike Plate</td>
+                <td>vehicle Plate</td>
                 <td><strong>{{form_data.plates}}</strong></td>
             </tr>
             <tr>
-                <td>Bike Name</td>
+                <td>vehicle Name</td>
                 <td><strong>{{form_data.b_name}}</strong></td>
             </tr>
             <tr>
-                <!--todo: <critical> select date drop off-->
-                <!--todo: <critical> select date pickup -->
                 <td>Customer Name</td>
                 <td><strong>{{form_data.l_name}} {{form_data.f_name}}</strong></td>
             </tr>
@@ -34,11 +32,10 @@
                 <td><strong>{{form_data.loc_address}}</strong></td>
             </tr>
             <tr>
-                <!--todo: <critical> type in value-->
                 <td>Mileage at start of the rental</td>
                 <td><strong>{{form_data.mileage}}</strong></td>
             </tr>
-             <tr>
+            <tr>
                 <td>Current Mileage</td>
                 <td><input value="" type="number" name="current-mileage" required></td>
             </tr>
@@ -56,7 +53,7 @@
             </tr>
             </tbody>
         </table>
-        <input value="{{form_data.bike_id}}" name="bike-id" type="hidden">
+        <input value="{{form_data.vehicle_id}}" name="vehicle-id" type="hidden">
         <input type="submit" value="End Rental">
     </form>
 

@@ -7,15 +7,15 @@
     </div>
 </nav>
 <div class="section">
-    <form class="col s12" action="." method="post">
+    <form class="col s12" action="/order" method="post">
         <div class="row">
             <div class="input-field col s12">
-                <select name="bike-id">
-                    <option selected value="{{bike_data.id}}">
-                        {{bike_data.name}} || {{bike_data.plates}} || {{bike_data.l_name}}
+                <select name="vehicle-id">
+                    <option selected value="{{vehicle_data.id}}">
+                        {{vehicle_data.name}} || {{vehicle_data.plates}} || {{vehicle_data.l_name}}
                     </option>
 
-                    {% for b in bikes %}
+                    {% for b in vehicles %}
                     <option value="{{b.id}}">
                         {{b.name}} || {{b.plates}} || {{b.l_name}}
                     </option>
@@ -23,12 +23,9 @@
 
                 </select>
             </div>
-            <input value="{{bike_data.l_id}}" name="bike-location-id" type="hidden">
-            <input value="{{bike_data.mileage}}" name="bike-mileage" type="hidden">
+            <input value="{{vehicle_data.l_id}}" name="vehicle-location-id" type="hidden">
+            <input value="{{vehicle_data.mileage}}" name="vehicle-mileage" type="hidden">
         </div>
-
-        <!--todo: <feature> assign d-off pp id-->
-        <!--todo: <feature> assign p-up pp id-->
 
         <div class="row">
             <div class="input-field col s12">

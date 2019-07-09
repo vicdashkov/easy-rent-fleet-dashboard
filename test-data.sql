@@ -2,13 +2,13 @@ INSERT INTO public.location(
 	name, address)
 	VALUES ('test-hotel', '2-22 phuket st');
 
-INSERT INTO public.bike(
+INSERT INTO public.vehicle(
 	name, mileage, location, plates)
-	VALUES ('test-bike', 1, 1, 'v771');
+	VALUES ('test-vehicle', 1, 1, 'v771');
 
-INSERT INTO public.bike(
+INSERT INTO public.vehicle(
 	name, mileage, location, plates)
-	VALUES ('test-bike-2', 100, 1, 'b100');
+	VALUES ('test-vehicle-2', 100, 1, 'b100');
 
 INSERT INTO public.customer(
 	l_name, f_name, location, phone, email, notes)
@@ -20,7 +20,7 @@ INSERT INTO public."user"(
 
 INSERT INTO public."order"(
 	start, "end", cus_id, amount, a_currency,
-	mileage_start, mileage_end, bike, notes,
+	mileage_start, mileage_end, vehicle, notes,
 	location_start, location_end, deposit,
 	d_currency, assign_p_up, assign_d_off, status)
 	VALUES ('2016-06-22 19:10:25-07', '2016-06-23 19:10:25-07', 1, 100, 'RUB',
