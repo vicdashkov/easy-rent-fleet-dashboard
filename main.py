@@ -64,10 +64,7 @@ def create_customer():
             response="Unable to create a customer"
         )
 
-    return Response(
-        status=200,
-        response=f"created customer {r.id}"
-    )
+    return render_template('success_creating_resource.html')
 
 
 @app.route('/create_vehicle', methods=['GET'])
@@ -110,10 +107,7 @@ def create_vehicle():
             response="Unable to create a vehicle"
         )
 
-    return Response(
-        status=200,
-        response=f"created vehicle {r.id}"
-    )
+    return render_template('success_creating_resource.html')
 
 
 @app.route('/create_location', methods=['GET'])
@@ -148,10 +142,7 @@ def create_location():
             response="Unable to create a location"
         )
 
-    return Response(
-        status=200,
-        response=f"created location {r.id}"
-    )
+    return render_template('success_creating_resource.html')
 
 
 @app.route('/order_new/<vehicle_id>', methods=['GET'])
@@ -321,8 +312,6 @@ def order_edit(order_id):
 
 @app.route('/order', methods=['post'])
 def fill_order_submit():
-    print("form", request.form)
-
     # todo: <feature> need to check if the vehiclecan be inserted
 
     f = request.form
@@ -360,7 +349,6 @@ def fill_order_submit():
                 dep_curr=f.get('deposit-cur-code'),
                 a_currency=f.get('amount-cur-code')
             ).fetchone()
-            print('result returning', r)
     except Exception as e:
         logger.exception(e)
         return Response(
@@ -368,11 +356,7 @@ def fill_order_submit():
             response="Unable to submit the order"
         )
 
-    return Response(
-        status=200,
-        response=f"submitted order {r.id}"
-
-    )
+    return render_template('success_creating_resource.html')
 
 
 @app.route('/drop_off_vehicles_list', methods=['GET'])
@@ -504,10 +488,7 @@ def change_order():
             response="Unable to successfully update order"
         )
 
-    return Response(
-        status=200,
-        response=f"updated order {order_id}. the order is now active"
-    )
+    return render_template('success_creating_resource.html')
 
 
 @app.route('/available_vehicles', methods=['GET'])
@@ -596,10 +577,7 @@ def hand_off_vehicle_start(order_id):
             response="Unable to successfully update order"
         )
 
-    return Response(
-        status=200,
-        response=f"updated order {order_id}. the order is now active"
-    )
+    return render_template('success_creating_resource.html')
 
 
 @app.route('/pickup_vehicle/<order_id>', methods=['GET'])
@@ -659,10 +637,7 @@ def pickup_vehicle_start(order_id):
             response="Unable to successfully update order"
         )
 
-    return Response(
-        status=200,
-        response=f"updated order {order_id}. the order is now active"
-    )
+    return render_template('success_creating_resource.html')
 
 
 @app.route('/', methods=['GET'])
